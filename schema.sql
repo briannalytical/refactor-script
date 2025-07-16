@@ -1,3 +1,4 @@
+-- create table enum --
 CREATE TYPE application_status_enum AS ENUM (
     'applied',
     'interviewing_first_scheduled',
@@ -13,6 +14,7 @@ CREATE TYPE application_status_enum AS ENUM (
     'rejected'
 );
 
+-- create table --
 CREATE TABLE application_tracking (
     id SERIAL PRIMARY KEY,
     job_title TEXT NOT NULL,
@@ -45,4 +47,4 @@ CREATE TABLE application_tracking (
     final_interview_post_notes TEXT,
     -- Offer details
     offer_details TEXT
-);
+)
