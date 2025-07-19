@@ -1,4 +1,4 @@
--- create table enum --
+-- enum type for application status
 CREATE TYPE application_status_enum AS ENUM (
     'applied',
     'interviewing_first_scheduled',
@@ -14,7 +14,15 @@ CREATE TYPE application_status_enum AS ENUM (
     'rejected'
 );
 
--- create table --
+-- enum type for follow-up actions
+CREATE TYPE follow_up_action_enum AS ENUM (
+    'check_application_status',
+    'send_follow_up_email',
+    'prepare_for_interview',
+    'send_thank_you_email',
+);
+
+-- table definition
 CREATE TABLE application_tracking (
     id SERIAL PRIMARY KEY,
     job_title TEXT NOT NULL,
@@ -23,10 +31,12 @@ CREATE TABLE application_tracking (
     date_applied TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     application_status application_status_enum DEFAULT 'applied',
     job_notes TEXT,
-    next_action TEXT,
+    next_action follow_up_action_enum DEFAULT 'check_application_status',
     check_application_status TIMESTAMP,
+    next_follow_up_date TIMESTAMP,
     follow_up_contact_name TEXT,
     follow_up_contact_details TEXT,
+
     -- First interview
     interviewer_name TEXT,
     interviewer_contact_details TEXT,
@@ -45,6 +55,46 @@ CREATE TABLE application_tracking (
     final_interview_date TIMESTAMP,
     final_interview_prep_notes TEXT,
     final_interview_post_notes TEXT,
+
     -- Offer details
     offer_details TEXT
-)
+);
+
+-- logic to exclude weekends
+CREATE OR REPLACE FUNCTION add_weekdays(start_date DATE, num_days INTEGER)
+RETURNS DATE AS $$
+DECLARE
+    current_date DATE := start_date;
+    added_days INTEGER := 0;
+BEGIN
+    WHILE added_days < num_days LOOP
+        current_date := current_date + INTERVAL '1 day';
+        IF EXTRACT(DOW FROM current_date) NOT IN (0, 6) THEN
+            added_days := added_days + 1;
+        END IF;
+    END LOOP;
+    RETURN current_date;
+END;
+$$ LANGUAGE plpgsql;
+
+-- trigger function to auto-fill follow-up dates
+CREATE OR REPLACE FUNCTION set_follow_up_dates()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.check_application_status IS NULL THEN
+        NEW.check_application_status := add_weekdays(NEW.date_applied::DATE, 2);
+    END IF;
+
+    IF NEW.next_follow_up_date IS NULL THEN
+        NEW.next_follow_up_date := add_weekdays(NEW.check_application_status::DATE, 1);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- trigger function that runs before insert
+CREATE TRIGGER populate_follow_up_dates
+BEFORE INSERT ON application_tracking
+FOR EACH ROW
+EXECUTE FUNCTION set_follow_up_dates();
