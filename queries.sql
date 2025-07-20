@@ -6,12 +6,16 @@ FROM application_tracking
 INSERT INTO application_tracking (
     job_title,
     company,
-    date_applied,
-	application_software
+	application_software,
+	job_notes
+	follow_up_contact_name,
+	follow_up_contact_details
 )
 VALUES (
-    'Junior DevOps Engineer',
-	'Tech Consulting',
-	'2025-07-16',
-	'linkedin easy apply'
+    '',
+	'',
+	'',
+	'',
+	'',
+	''
 	)
