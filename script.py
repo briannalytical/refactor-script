@@ -1,26 +1,26 @@
 import psycopg2
 from datetime import date
 
-# DB connection info — customize this
+# db connection info
 conn = psycopg2.connect(
-    dbname='your_db_name',
-    user='your_user',
-    password='your_password',
+    dbname='stack_trace_application_tracker',
+    user='postgres',
+    password='Mozto@35573getit',
     host='localhost',
     port='5432'
 )
 
 cursor = conn.cursor()
 
-# Get today’s date
+# get today’s date
 today = date.today()
 
-# Query tasks for today
+# pull actions/tasks
 query = """
 SELECT id, job_title, company, next_action, check_application_status, next_follow_up_date
 FROM application_tracking
-WHERE check_application_status = %s
-   OR next_follow_up_date = %s
+WHERE check_application_status::date = %s
+   OR next_follow_up_date::date = %s
 ORDER BY job_title;
 """
 
