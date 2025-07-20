@@ -1,5 +1,21 @@
+-- view table --
 SELECT *
-FROM quotes
+FROM application_tracking
 
-INSERT INTO quotes (quote_text, video_name, video_date)
-VALUES ('', '', '')
+-- insert new job --
+INSERT INTO application_tracking (
+    job_title,
+    company,
+	application_software,
+	job_notes,
+	follow_up_contact_name,
+	follow_up_contact_details
+)
+VALUES (
+    'test',
+	'test',
+	'test',
+	'test',
+	'test',
+	'test'
+	)

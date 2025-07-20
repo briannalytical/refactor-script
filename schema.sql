@@ -17,9 +17,14 @@ CREATE TYPE application_status_enum AS ENUM (
 -- enum type for follow-up actions
 CREATE TYPE follow_up_action_enum AS ENUM (
     'check_application_status',
+	'follow up with contact',
     'send_follow_up_email',
     'prepare_for_interview',
-    'send_thank_you_email'
+    'send_thank_you_email',
+	'prepare_for_second_interview',
+	'send_thank_you_email_second_interview',
+	'prepare_for_final_interview',
+	'send_thank_you_email_final_interview'
 );
 
 -- table definition
