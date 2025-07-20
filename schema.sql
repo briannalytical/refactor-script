@@ -19,7 +19,7 @@ CREATE TYPE follow_up_action_enum AS ENUM (
     'check_application_status',
     'send_follow_up_email',
     'prepare_for_interview',
-    'send_thank_you_email',
+    'send_thank_you_email'
 );
 
 -- table definition
@@ -61,19 +61,19 @@ CREATE TABLE application_tracking (
 );
 
 -- logic to exclude weekends
-CREATE OR REPLACE FUNCTION add_weekdays(start_date DATE, num_days INTEGER)
+CREATE OR REPLACE FUNCTION add_weekdays(start_date DATE, num_days INT)
 RETURNS DATE AS $$
 DECLARE
-    current_date DATE := start_date;
-    added_days INTEGER := 0;
+    curr_date DATE := start_date;
+    added_days INT := 0;
 BEGIN
     WHILE added_days < num_days LOOP
-        current_date := current_date + INTERVAL '1 day';
-        IF EXTRACT(DOW FROM current_date) NOT IN (0, 6) THEN
+        curr_date := curr_date + 1;
+        IF EXTRACT(DOW FROM curr_date) NOT IN (0, 6) THEN
             added_days := added_days + 1;
         END IF;
     END LOOP;
-    RETURN current_date;
+    RETURN curr_date;
 END;
 $$ LANGUAGE plpgsql;
 
