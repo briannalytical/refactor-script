@@ -1,9 +1,9 @@
 import psycopg2
 from datetime import date
 
-# Connect to the database
+# db connection
 conn = psycopg2.connect(
-    dbname="breembair",  # or "postgres" if that's where your table lives
+    dbname="postgres,"
     user="postgres",
     password="your_password_here",
     host="localhost",
@@ -11,24 +11,24 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-# Get today’s date
+# fetch today's date
 today = date.today()
 
-# ---------- MAIN MENU ----------
-print("\n📋 What would you like to do?")
+# menu
+print("\n📋 Hello! How can I help you?")
 print("1. View today’s tasks")
 print("2. Add a new job application")
 print("3. Update an existing application")
 
 choice = input("Enter 1, 2, or 3: ").strip()
 
-# ---------- OPTION 1: Today's Tasks ----------
+# option 1: tasks
 if choice == "1":
     query = """
         SELECT id, job_title, company, next_action, check_application_status, next_follow_up_date
         FROM application_tracking
-        WHERE check_application_status = %s
-           OR next_follow_up_date = %s
+        WHERE check_application_status::DATE = %s
+            OR next_follow_up_date::DATE = %s
         ORDER BY job_title;
     """
     cursor.execute(query, (today, today))
