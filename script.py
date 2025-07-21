@@ -17,7 +17,7 @@ today = date.today()
 # menu
 print("\n📋 Hello! How can I help you?")
 print("1. View today’s tasks")
-print("2. Add a new job application")
+print("2. Track a new job application")
 print("3. Update an existing application")
 
 choice = input("Enter 1, 2, or 3: ").strip()
@@ -47,13 +47,16 @@ if choice == "1":
             print(f"   → Type: {due_type}")
             print()
 
-# ---------- OPTION 2: Add a New Application ----------
+# option 2: application entry
 elif choice == "2":
-    print("\n--- New Job Application ---")
+    print("\nEnter your new application details:")
     job_title = input("Job title: ").strip()
     company = input("Company: ").strip()
-    software = input("Application software (LinkedIn, Greenhouse, etc): ").strip()
-    notes = input("Any job notes? (optional): ").strip()
+    software = input("How did you apply for this application: (LinkedIn, Greenhouse, company website, etc): ").strip()
+    notes = input("Any notes about this particular role? (optional): ").strip()
+    print("\nOptional now, but do your research! 🔎 Who is the contact or recruiter you'll need to follow up with? If you don't know now, you can add it later.")
+    follow_up_contact_name = input("Contact Name: ").strip()
+    follow_up_contact_details = input("Contact Details: ").strip()
 
     cursor.execute("""
         INSERT INTO application_tracking (job_title, company, application_software, job_notes)
@@ -61,9 +64,9 @@ elif choice == "2":
     """, (job_title, company, software or None, notes or None))
 
     conn.commit()
-    print("✅ Application added!")
+    print("✅ Application added! I'll remind you when you have tasks related to this job in the future! 🎉 Around here we FOLLW UP with applications. 😊")
 
-# ---------- OPTION 3: Update Existing ----------
+# option 3: update existing 
 elif choice == "3":
     cursor.execute("SELECT id, job_title, company FROM application_tracking ORDER BY id;")
     apps = cursor.fetchall()
@@ -73,19 +76,28 @@ elif choice == "3":
         print(f"{app[0]}: {app[1]} @ {app[2]}")
 
     app_id = int(input("\nEnter the ID of the application you want to update: "))
-    print("\nWhat do you want to update?")
-    print("→ status, interview, followup, or notes")
+    print("\nWhat do you need to update?")
+    print("➡️ please enter status, followup, interview, or notes")
     field = input("Field to update: ").strip().lower()
 
     if field == "status":
         print("\nAvailable status values:")
-        print("→ applied, interviewing_first_scheduled, interviewing_first_completed, etc.")
         new_status = input("New application status: ").strip()
         cursor.execute("""
             UPDATE application_tracking
             SET application_status = %s
             WHERE id = %s;
         """, (new_status, app_id))
+
+    elif field == "followup":
+        contact_name = input("Contact name: ").strip()
+        contact_details = input("Contact email/phone: ").strip()
+        cursor.execute("""
+            UPDATE application_tracking
+            SET follow_up_contact_name = %s,
+                follow_up_contact_details = %s
+            WHERE id = %s;
+        """, (contact_name, contact_details, app_id))
 
     elif field == "interview":
         interview_date = input("Enter interview date (YYYY-MM-DD): ").strip()
@@ -99,16 +111,6 @@ elif choice == "3":
                 interview_prep_notes = %s
             WHERE id = %s;
         """, (interview_date, interview_name, prep_notes or None, app_id))
-
-    elif field == "followup":
-        contact_name = input("Contact name: ").strip()
-        contact_details = input("Contact email/phone: ").strip()
-        cursor.execute("""
-            UPDATE application_tracking
-            SET follow_up_contact_name = %s,
-                follow_up_contact_details = %s
-            WHERE id = %s;
-        """, (contact_name, contact_details, app_id))
 
     elif field == "notes":
         new_notes = input("Enter your updated job notes: ").strip()
