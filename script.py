@@ -3,9 +3,8 @@ from datetime import date
 
 # db connection info
 conn = psycopg2.connect(
-    dbname='stack_trace_application_tracker',
+    dbname='postgres',
     user='postgres',
-    password='Mozto@35573getit',
     host='localhost',
     port='5432'
 )
