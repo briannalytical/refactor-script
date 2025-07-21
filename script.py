@@ -2,8 +2,8 @@ import psycopg2
 from datetime import date
 
 # db connection
-conn = psycopg2.connect(
-    dbname="postgres,"
+conn = psycopg2.connect (
+    dbname="postgres",
     user="postgres",
     password="your_password_here",
     host="localhost",
@@ -54,9 +54,9 @@ elif choice == "2":
     company = input("Company: ").strip()
     software = input("How did you apply for this application: (LinkedIn, Greenhouse, company website, etc): ").strip()
     notes = input("Any notes about this particular role? (optional): ").strip()
-    print("\nOptional now, but do your research! 🔎 Who is the contact or recruiter you'll need to follow up with? If you don't know now, you can add it later.")
-    follow_up_contact_name = input("Contact Name: ").strip()
-    follow_up_contact_details = input("Contact Details: ").strip()
+    print("Optional now, but do your research! 🔎 Who is the contact or recruiter you'll need to follow up with? If you don't know now, you can add it later.")
+    contact_name = input("Contact Name: ").strip()
+    contact_details = input("Contact Details: ").strip()
 
     cursor.execute("""
         INSERT INTO application_tracking (job_title, company, application_software, job_notes)
@@ -64,7 +64,7 @@ elif choice == "2":
     """, (job_title, company, software or None, notes or None))
 
     conn.commit()
-    print("✅ Application added! I'll remind you when you have tasks related to this job in the future! 🎉 Around here we FOLLW UP with applications. 😊")
+    print("✅ Application added! I'll remind you when you have tasks related to this job in the future! 🎉 Around here we FOLLOW UP with applications. 😊")
 
 # option 3: update existing 
 elif choice == "3":
@@ -124,7 +124,7 @@ elif choice == "3":
     print("✅ Application updated.")
 
 else:
-    print("❌ Invalid selection.")
+    print("❌ Invalid selection 🥲 Please start again.")
 
 # ---------- CLEANUP ----------
 cursor.close()
