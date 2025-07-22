@@ -15,16 +15,21 @@ cursor = conn.cursor()
 today = date.today()
 
 # menu
-def show_main_menu():
+def show_intro():
     print("\n📋 Hello! Welcome to Stack Trace Job Application Tracker! I hope you will find this tool useful! 🥰")
     print("It's tough out there, but tracking your applications doesn't have to be!")
-    print("\nYou can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
-    print("\nVIEW: View all applications.")
+    print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
+
+def show_main_menu():
+    print("\nVIEW: View all applications")
     print("TASKS: View today’s tasks")
     print("ENTER: Track a new job application")
     print("UPDATE: Update an existing application")
     print("TIPS: Some helpful tips to keep in mind as you apply")
     print("BYE: End your session")
+    
+    show_intro()
+    show_main_menu()
 
 while True:
     show_main_menu()
