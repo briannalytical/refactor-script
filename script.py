@@ -18,9 +18,8 @@ today = date.today()
 def show_main_menu():
     print("\n📋 Hello! Welcome to Stack Trace Job Application Tracker! I hope you will find this tool useful! 🥰")
     print("It's tough out there, but tracking your applications doesn't have to be!")
-    print("You can use this tool to remind yourself to check on applications, when to follow up, and track your interviews!")
-    print("\nPlease enter a choice below:")
-    print("VIEW: View all applications.")
+    print("\nYou can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
+    print("\nVIEW: View all applications.")
     print("TASKS: View today’s tasks")
     print("ENTER: Track a new job application")
     print("UPDATE: Update an existing application")
@@ -32,12 +31,20 @@ while True:
     choice = input("Enter your choice: ").strip().upper()
 
     if choice == "VIEW":
-        query = """
-            SELECT *
-            FROM application_tracking
-        """
-        cursor.execute(query, (today, today))
+        query = "SELECT * FROM application_tracking"
+        cursor.execute(query)
         rows = cursor.fetchall()
+        column_names = [desc[0] for desc in cursor.description]
+
+        if not rows:
+            print("📭 No applications found.")
+        else:
+            print("\n📄 All Tracked Applications")
+            print("-" * 50)
+            for row in rows:
+                for col_name, value in zip(column_names, row):
+                    print(f"{col_name}: {value}")
+                    print("-" * 50)
 
     # option 2: tasks
     elif choice == "TASKS":
@@ -69,7 +76,7 @@ while True:
         print("\nEnter your new application details:")
         job_title = input("Job title: ").strip()
         company = input("Company: ").strip()
-        software = input("How did you apply (LinkedIn, Greenhouse, etc): ").strip()
+        software = input("How did you apply (LinkedIn, Workday, Greenhouse, company website etc): ").strip()
         notes = input("Any notes about this role? (optional): ").strip()
         print("Optional now, but do your research! 🔎")
         contact_name = input("Contact Name: ").strip()
@@ -147,7 +154,7 @@ while True:
         print("Keep applying, keep trying. 💻 It will not be this way forever.")
         
 
-    elif choice == "EXIT":
+    elif choice == "BYE":
         print("👋 Goodbye! Check back again soon!")
         break
 
