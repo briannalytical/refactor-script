@@ -28,12 +28,11 @@ def show_main_menu():
     print("TIPS: Some helpful tips to keep in mind as you apply")
     print("BYE: End your session")
     
-    show_intro()
-    show_main_menu()
+show_intro()
 
 while True:
     show_main_menu()
-    choice = input("Enter your choice: ").strip().upper()
+    choice = input("\nEnter your choice: ").strip().upper()
 
     if choice == "VIEW":
         query = "SELECT * FROM application_tracking"
