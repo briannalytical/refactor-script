@@ -50,6 +50,7 @@ while True:
                 for col, val in zip(column_names, row):
                     if val not in (None, ''):
                         print(f"{col}: {val}")
+                        print("-" * 50)
             print("-" * 50)
 
     # option 2: tasks
