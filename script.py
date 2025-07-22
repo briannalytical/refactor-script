@@ -34,6 +34,7 @@ while True:
     show_main_menu()
     choice = input("\nEnter your choice: ").strip().upper()
 
+    #option 1: view applications
     if choice == "VIEW":
         query = "SELECT * FROM application_tracking"
         cursor.execute(query)
@@ -97,7 +98,7 @@ while True:
         conn.commit()
         print("✅ Application added! I’ll remind you when you have tasks related to this job. 😊")
 
-    # option 3: update existing
+    # option 4: update existing
     elif choice == "UPDATE":
         cursor.execute("SELECT id, job_title, company FROM application_tracking ORDER BY id;")
         apps = cursor.fetchall()
