@@ -41,14 +41,15 @@ while True:
         column_names = [desc[0] for desc in cursor.description]
 
         if not rows:
-            print("📭 No applications found.")
+            print("\n😶 No applications found.")
         else:
-            print("\n📄 All Tracked Applications")
+            print("\n📄 All applications:")
             print("-" * 50)
             for row in rows:
-                for col_name, value in zip(column_names, row):
-                    print(f"{col_name}: {value}")
-                    print("-" * 50)
+                for col, val in zip(column_names, row):
+                    if val not in (None, ''):
+                        print(f"{col}: {val}")
+            print("-" * 50)
 
     # option 2: tasks
     elif choice == "TASKS":
@@ -107,7 +108,7 @@ while True:
 
         app_id = int(input("\nEnter the ID of the application to update: "))
         print("\nWhat do you want to update?")
-        print("➡️ Please enter: status, followup, interview, or notes")
+        print("➡️ Please enter: status, followup, interview, or notes: 👩🏻‍💻")
         field = input("Field to update: ").strip().lower()
 
         if field == "status":
@@ -165,6 +166,6 @@ while True:
     else:
         print("❌ Invalid selection. 🥲 Please try again from the main menu.")
 
-# ---------- CLEANUP ----------
+# cleanup
 cursor.close()
 conn.close()
