@@ -22,6 +22,7 @@ def show_intro():
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
 
 def show_main_menu():
+    print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
     print("TASKS: View today’s tasks")
     print("ENTER: Track a new job application")
@@ -33,7 +34,7 @@ show_intro()
 
 while True:
     show_main_menu()
-    choice = input("\nEnter your choice: ").strip().upper()
+    choice = input("\nAction: ").strip().upper()
 
     # Option 1: View applications
     if choice == "VIEW":
