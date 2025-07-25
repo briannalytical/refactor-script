@@ -52,7 +52,7 @@ while True:
             print("\n📝 Application")
             print("-" * 60)
             for col, val in zip(column_names, row):
-                if val in (None, ''):
+                if col != "id" and val not in (None, ''):
                     continue
                 # format field name
                 field_name = col.replace("_", " ").title()
