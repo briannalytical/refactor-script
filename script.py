@@ -155,6 +155,7 @@ while True:
         elif field == "interview":
             interview_date = input("Enter interview date (YYYY-MM-DD): ").strip()
             interview_name = input("Interviewer name: ").strip()
+            interview_time = input("Enter interview time:")
             interview_time = input("Enter interview time (HH:MM, 24h format): ").strip()
             prep_notes = input("Any prep notes? (optional, but recommended): ").strip()
             cursor.execute("""
