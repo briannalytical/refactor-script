@@ -1,3 +1,4 @@
+import datetime
 import psycopg2
 from datetime import date
 
@@ -34,7 +35,7 @@ while True:
     show_main_menu()
     choice = input("\nEnter your choice: ").strip().upper()
 
-    #option 1: view applications
+    # Option 1: View applications
     if choice == "VIEW":
         query = "SELECT * FROM application_tracking"
         cursor.execute(query)
@@ -44,14 +45,26 @@ while True:
         if not rows:
             print("\n😶 No applications found.")
         else:
-            print("\n📄 All applications:")
-            print("-" * 50)
-            for row in rows:
-                for col, val in zip(column_names, row):
-                    if val not in (None, ''):
-                        print(f"{col}: {val}")
-                        print("-" * 50)
-            print("-" * 50)
+            print("\n📄 All Applications")
+            print("=" * 60)
+
+        for row in rows:
+            print("\n📝 Application")
+            print("-" * 60)
+            for col, val in zip(column_names, row):
+                if val in (None, ''):
+                    continue
+                # format field name
+                field_name = col.replace("_", " ").title()
+
+                # format date and time
+                if isinstance(val, datetime.date):
+                    val = val.strftime("%B %d, %Y")
+                elif isinstance(val, datetime.time):
+                    val = val.strftime("%I:%M %p")
+
+                print(f"{field_name}: {val}")
+            print("-" * 60)
 
     # option 2: tasks
     elif choice == "TASKS":
