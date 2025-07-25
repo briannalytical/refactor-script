@@ -45,7 +45,8 @@ CREATE TABLE application_tracking (
     -- First interview
     interviewer_name TEXT,
     interviewer_contact_details TEXT,
-    interview_date TIMESTAMP,
+    interview_date DATE,
+	interview_time TIME,
     interview_prep_notes TEXT,
     interview_post_notes TEXT,
     -- Second interview
