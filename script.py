@@ -50,68 +50,88 @@ while True:
             print("=" * 60)
 
         for row in rows:
-            print("\n📝 Application")
-            print("-" * 60)
-            for col, val in zip(column_names, row):
-                if col != "id" and val not in (None, ''):
-                    continue
-                # format field name
-                field_name = col.replace("_", " ").title()
+            # Pair column names with values and exclude 'id' and empty/null values
+            display_fields = [
+                (col, val) for col, val in zip(column_names, row)
+                    if col != "id" and val not in (None, '')
+            ]
 
-                # format date and time
-                if isinstance(val, datetime.date):
-                    val = val.strftime("%B %d, %Y")
-                elif isinstance(val, datetime.time):
-                    val = val.strftime("%I:%M %p")
+            if display_fields:
+                for col, val in display_fields:
+                    # Format dates and times
+                    if isinstance(val, datetime.date):
+                        val = val.strftime("%B %d, %Y")
+                    elif isinstance(val, datetime.time):
+                        val = val.strftime("%I:%M %p")
 
-                print(f"{field_name}: {val}")
-            print("-" * 60)
+                    # Format column name nicely (optional)
+                    col_clean = col.replace('_', ' ').title()
+                    print(f"{col_clean}: {val}")
+
+                print("-" * 60)
 
     # option 2: tasks
     elif choice == "TASKS":
         query = """
             SELECT id, job_title, company, next_action,
-            check_application_status, next_follow_up_date,
-            interview_date, interview_time, second_interview_date, final_interview_date
+               check_application_status, next_follow_up_date,
+               interview_date, interview_time, second_interview_date, final_interview_date
             FROM application_tracking
             WHERE check_application_status::DATE = %s
             OR next_follow_up_date::DATE = %s
             OR interview_date::DATE = %s
-            OR interview_time::DATE = %s
             OR second_interview_date::DATE = %s
             OR final_interview_date::DATE = %s
-        ORDER BY job_title;
+            ORDER BY job_title;
         """
-        cursor.execute(query, (today, today, today, today, today))
-        rows = cursor.fetchall()
+    cursor.execute(query, (today, today, today, today, today))
+    rows = cursor.fetchall()
+
+    if not rows:
+        print("\n🎉 No tasks for today!")
+    else:
+        print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
+        print("-" * 60)
 
         for row in rows:
             (app_id, job_title, company, next_action,
-            check_date, follow_up_date,
-            interview_date, interview_time,
-            second_interview_date, second_interview_time,
-            final_interview_date, final_interview_time) = row
+             check_date, follow_up_date,
+             interview_date, interview_time,
+             second_interview_date, final_interview_date) = row
 
-            # Determine type of task and set interview time if relevant
-            if interview_date == today:
-                due_type = "First Interview"
-                interview_time_to_show = interview_time
-            elif second_interview_date == today:
-                due_type = "Second Interview"
-                interview_time_to_show = second_interview_time
-            elif final_interview_date == today:
-                due_type = "Final Interview"
-                interview_time_to_show = final_interview_time
+            # Determine task type
+            if interview_date == today or second_interview_date == today or final_interview_date == today:
+                due_type = "Interview"
             else:
                 due_type = "Follow Up"
-                interview_time_to_show = None
 
+            # Print task
             print(f"📌 {job_title} @ {company}")
             print(f"   → Task: {next_action.replace('_', ' ').title()}")
             print(f"   → Type: {due_type}")
-            if interview_time_to_show:
-                print(f"   → Time: {interview_time_to_show.strftime('%I:%M %p')}")
-                print()
+            if interview_time:
+                print(f"   → Interview Time: {interview_time.strftime('%I:%M %p')}")
+            print()
+
+            # prompt to complete task
+            complete = input("✅ Mark this task as completed? (y/n): ").strip().lower()
+            if complete == "y":
+                # You can adjust status logic here
+                updated_status = input("Enter new application status (or press Enter to skip): ").strip()
+                if updated_status:
+                    cursor.execute("""
+                        UPDATE application_tracking
+                        SET application_status = %s
+                        WHERE id = %s;
+                    """, (updated_status, app_id))
+                    conn.commit()
+                    print("✅ Status updated!\n")
+                else:
+                    print("⏭️ Skipped updating status.\n")
+            else:
+                print("⏭️ Skipped.\n")
+
+        print("-" * 60)
 
     # option 3: application entry
     elif choice == "ENTER":
@@ -132,7 +152,7 @@ while True:
         """, (job_title, company, software or None, notes or None, contact_name or None, contact_details or None))
 
         conn.commit()
-        print("✅ Application added! I’ll remind you when you have tasks related to this job. 😊")
+        print("\n✅ Application added! I’ll remind you when you have tasks related to this job. 😊")
 
     # option 4: update existing
     elif choice == "UPDATE":
