@@ -141,8 +141,8 @@ while True:
                 print(f"✅ Status auto-updated to: {new_status}\n")
 
             # enter status manually
-            manual = input("✏️ Would you like to manually update the application status? (y/n): ").strip().lower()
-            if manual == "y":
+            manual = input("✏️ Would you like to manually update the application status? (Y/N): ").strip().lower()
+            if manual == "Y":
                 print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
                 new_status = input("Enter new application status: ").strip()
                 if new_status:
