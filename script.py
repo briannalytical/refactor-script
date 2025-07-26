@@ -32,9 +32,11 @@ def show_main_menu():
     
 show_intro()
 
+
 while True:
     show_main_menu()
     choice = input("\nAction: ").strip().upper()
+
 
     # view: view applications
     if choice == "VIEW":
@@ -69,6 +71,7 @@ while True:
                     print(f"{col_clean}: {val}")
 
                 print("-" * 60)
+
 
     # option 2: tasks and completion of tasks
     elif choice == "TASKS":
@@ -127,7 +130,6 @@ while True:
                     'prepare_for_final_interview': 'interviewing_final_completed',
                     'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
                 }
-
                 
                 new_status = auto_status_map.get(next_action, current_status)
                 cursor.execute("""
@@ -138,7 +140,7 @@ while True:
                 conn.commit()
                 print(f"✅ Status auto-updated to: {new_status}\n")
 
-            # Option 2: Manual status override
+            # enter status manually
             manual = input("✏️ Would you like to manually update the application status? (y/n): ").strip().lower()
             if manual == "y":
                 print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
@@ -156,7 +158,6 @@ while True:
             else:
                 print("⏭️ Skipped status update.\n")
         print("-" * 60)
-
 
 
     # option 3: application entry
@@ -179,6 +180,7 @@ while True:
 
         conn.commit()
         print("\n✅ Application added! I’ll remind you when you have tasks related to this job. 😊")
+
 
     # option 4: update existing
     elif choice == "UPDATE":
@@ -236,7 +238,8 @@ while True:
 
         conn.commit()
         print("✅ Application updated.")
-        
+    
+    
     elif choice == "TIPS":
         print("Around here we FOLLOW UP! 📩 You are 78% more likely to land an interview if you reach out to a recruiter or hiring manager after you apply.")
         print("TAKE NOTES! ✏️ You should already know why you want to work for the company and about their mission BEFORE speaking with someone from the company.")
@@ -247,7 +250,7 @@ while True:
     elif choice == "BYE":
         print("👋 Goodbye! Check back again soon!")
         break
-
+    
     else:
         print("❌ Invalid selection. 🥲 Please try again from the main menu.")
 
