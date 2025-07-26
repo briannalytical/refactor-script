@@ -36,7 +36,7 @@ while True:
     show_main_menu()
     choice = input("\nAction: ").strip().upper()
 
-    # Option 1: View applications
+    # view: view applications
     if choice == "VIEW":
         query = "SELECT * FROM application_tracking"
         cursor.execute(query)
@@ -70,11 +70,11 @@ while True:
 
                 print("-" * 60)
 
-    # option 2: tasks
+    # option 2: tasks and completion of tasks
     elif choice == "TASKS":
         query = """
             SELECT id, job_title, company, next_action,
-               check_application_status, next_follow_up_date,
+               check_application_status, application_status, next_follow_up_date,
                interview_date, interview_time, second_interview_date, final_interview_date
             FROM application_tracking
             WHERE check_application_status::DATE = %s
@@ -84,28 +84,28 @@ while True:
             OR final_interview_date::DATE = %s
             ORDER BY job_title;
         """
-    cursor.execute(query, (today, today, today, today, today))
-    rows = cursor.fetchall()
+        cursor.execute(query, (today, today, today, today, today))
+        rows = cursor.fetchall()
 
-    if not rows:
-        print("\n🎉 No tasks for today!")
-    else:
-        print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
-        print("-" * 60)
+        if not rows:
+            print("\n🎉 No tasks for today!")
+        else:
+            print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
+            print("-" * 60)
 
         for row in rows:
             (app_id, job_title, company, next_action,
-             check_date, follow_up_date,
-             interview_date, interview_time,
-             second_interview_date, final_interview_date) = row
+            check_date, follow_up_date, interview_date,
+            interview_time, second_interview_date, final_interview_date,
+            current_status) = row
 
-            # Determine task type
+            # determine task type
             if interview_date == today or second_interview_date == today or final_interview_date == today:
                 due_type = "Interview"
             else:
                 due_type = "Follow Up"
 
-            # Print task
+            # print tasks
             print(f"📌 {job_title} @ {company}")
             print(f"   → Task: {next_action.replace('_', ' ').title()}")
             print(f"   → Type: {due_type}")
@@ -113,25 +113,51 @@ while True:
                 print(f"   → Interview Time: {interview_time.strftime('%I:%M %p')}")
             print()
 
-            # prompt to complete task
+            # automate status based on current next_action
             complete = input("✅ Mark this task as completed? (y/n): ").strip().lower()
             if complete == "y":
-                # You can adjust status logic here
-                updated_status = input("Enter new application status (or press Enter to skip): ").strip()
-                if updated_status:
+                auto_status_map = {
+                    'check_application_status': 'interviewing_first_scheduled',
+                    'follow_up_with_contact': 'interviewing_first_scheduled',
+                    'send_follow_up_email': 'interviewing_first_followed_up',
+                    'prepare_for_interview': 'interviewing_first_completed',
+                    'send_thank_you_email': 'interviewing_first_followed_up',
+                    'prepare_for_second_interview': 'interviewing_second_completed',
+                    'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
+                    'prepare_for_final_interview': 'interviewing_final_completed',
+                    'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
+                }
+
+                
+                new_status = auto_status_map.get(next_action, current_status)
+                cursor.execute("""
+                    UPDATE application_tracking
+                    SET application_status = %s
+                    WHERE id = %s;
+                """, (new_status, app_id))
+                conn.commit()
+                print(f"✅ Status auto-updated to: {new_status}\n")
+
+            # Option 2: Manual status override
+            manual = input("✏️ Would you like to manually update the application status? (y/n): ").strip().lower()
+            if manual == "y":
+                print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
+                new_status = input("Enter new application status: ").strip()
+                if new_status:
                     cursor.execute("""
                         UPDATE application_tracking
                         SET application_status = %s
                         WHERE id = %s;
-                    """, (updated_status, app_id))
+                    """, (new_status, app_id))
                     conn.commit()
-                    print("✅ Status updated!\n")
+                    print(f"✅ Status manually updated to: {new_status}\n")
                 else:
-                    print("⏭️ Skipped updating status.\n")
+                    print("⏭️ No status entered.\n")
             else:
-                print("⏭️ Skipped.\n")
-
+                print("⏭️ Skipped status update.\n")
         print("-" * 60)
+
+
 
     # option 3: application entry
     elif choice == "ENTER":
