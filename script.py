@@ -227,13 +227,13 @@ while True:
                             new_status = status_options[labels[index]]
                     else:
                         print("❌ Invalid number")
+            else:
+                # case insensitive text
+                lower_map = {k.lower(): v for k, v in status_options.items()}
+                if choice.lower() in lower_map:
+                    new_status = lower_map[choice.lower()]
                 else:
-                    # case insensitive text
-                    lower_map = {k.lower(): v for k, v in status_options.items()}
-                    if choice.lower() in lower_map:
-                        new_status = lower_map[choice.lower()]
-                    else:
-                        print("❌ Invalid status name")
+                    print("❌ Invalid status name")
 
             cursor.execute("""
                 UPDATE application_tracking
