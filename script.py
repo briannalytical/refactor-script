@@ -38,9 +38,15 @@ while True:
     choice = input("\nAction: ").strip().upper()
 
 
-    # VIEW: view applications
+# VIEW: view applications
     if choice == "VIEW":
-        query = "SELECT * FROM application_tracking"
+        field = input("\nDo you want to see only active applications? (Y/N): ").strip().lower()
+
+        if field == "y":
+            query = "SELECT * FROM application_tracking WHERE application_status != 'rejected'"
+        else:
+            query = "SELECT * FROM application_tracking"
+
         cursor.execute(query)
         rows = cursor.fetchall()
         column_names = [desc[0] for desc in cursor.description]
@@ -48,8 +54,17 @@ while True:
         if not rows:
             print("\n😶 No applications found.")
         else:
-            print("\n📄 All Applications")
+            print("\n📄 Applications")
             print("=" * 60)
+            for row in rows:
+                # exclude null fields and ID
+                display_fields = [
+                    (col, val) for col, val in zip(column_names, row)
+                    if col != "id" and val not in (None, '')
+                ]
+                for col, val in display_fields:
+                    print(f"{col.replace('_', ' ').title()}: {val}")
+                print("-" * 50)
 
         for row in rows:
             # pair column names with values and exclude 'id' and empty/null values
