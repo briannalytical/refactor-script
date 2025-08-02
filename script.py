@@ -64,7 +64,7 @@ while True:
                 ]
                 for col, val in display_fields:
                     print(f"{col.replace('_', ' ').title()}: {val}")
-                print("-" * 50)
+            print("-" * 50)
 
         for row in rows:
             # pair column names with values and exclude 'id' and empty/null values
@@ -132,6 +132,9 @@ while True:
                 print()
 
             # automate status based on current next_action
+            #TODO: correct task to complete and not update
+            #TODO: create backlog of tasks
+            #TODO: when task is not completed, put in backlog
             complete = input("✅ Mark this task as completed? (y/n): ").strip().lower()
             if complete == "y":
                 auto_status_map = {
@@ -156,6 +159,7 @@ while True:
                 print(f"✅ Status auto-updated to: {new_status}\n")
 
             # enter status manually
+            #TODO: possibly rewrite to update? logic is already implemented
             manual = input("✏️ Would you like to manually update the application status? (Y/N): ").strip().lower()
             if manual == "Y":
                 print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
