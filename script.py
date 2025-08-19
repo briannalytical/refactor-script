@@ -50,7 +50,8 @@ while True:
                 query = "SELECT * FROM application_tracking"
                 break
             elif field == "e":
-                break
+                print("🚪 Exiting application view.")
+                continue
             else:
                 print("❌ Please make a valid entry (Y/N/E)")
                 continue
