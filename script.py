@@ -418,8 +418,8 @@ while True:
                 print(f"   Status: {status}")
                 
                 while True:
-                    confirm1 = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
-                    if confirm1 in ['Y', 'N']:
+                    input = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
+                    if input in ['Y', 'N']:
                         break
                     print("❌ Please enter Y or N")
         
