@@ -306,12 +306,13 @@ while True:
         print("2. Update contact info")
         print("3. Schedule interview")
         print("4. Notes")
+        print("5. Delete Entry")
         
         while True:
             field_choice = input("Field to update (1-4): ").strip()
-            if field_choice in ['1', '2', '3', '4']:
+            if field_choice in ['1', '2', '3', '4', '5']:
                 break
-            print("❌ Please enter 1, 2, 3, or 4")
+            print("❌ Please enter 1, 2, 3, 4, or 5")
 
         if field_choice == "1":
             status_options = {
@@ -400,6 +401,14 @@ while True:
             """, (new_notes, app_id))
             conn.commit()
             print("✅ Notes updated.")
+        
+        elif field_choice == "5":
+            cursor.execute("""
+                SELECT job_title, company, application_status 
+                FROM application_tracking 
+                WHERE id = %s;
+            """, (app_id,))
+            app_details = cursor.fetchone()
 
     # TIPS: tips for job seekers
     elif choice == "TIPS":
