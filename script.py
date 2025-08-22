@@ -135,6 +135,8 @@ while True:
             #TODO: correct task to complete and not update
             #TODO: create backlog of tasks
             #TODO: when task is not completed, put in backlog
+            #TODO: invalid entry
+            #TODO: no auto-update
             complete = input("✅ Mark this task as completed? (y/n): ").strip().lower()
             if complete == "y":
                 auto_status_map = {
