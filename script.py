@@ -85,8 +85,61 @@ while True:
 
                         print("-" * 60)
 
-    # TASKS: due tasks and completion of tasks
+    #TASKS: check follow-up tasks information
     elif choice == "TASKS":
+        backlog_query = """
+            SELECT id, job_title, company, next_action,
+               check_application_status, application_status, next_follow_up_date,
+               interview_date, interview_time, second_interview_date, final_interview_date
+            FROM application_tracking
+            WHERE (check_application_status::DATE < %s AND check_application_status IS NOT NULL)
+            OR (next_follow_up_date::DATE < %s AND next_follow_up_date IS NOT NULL)
+            OR (interview_date::DATE < %s AND interview_date IS NOT NULL)
+            OR (second_interview_date::DATE < %s AND second_interview_date IS NOT NULL)
+            OR (final_interview_date::DATE < %s AND final_interview_date IS NOT NULL)
+            ORDER BY job_title;
+        """
+        cursor.execute(backlog_query, (today, today, today, today, today))
+        backlog_rows = cursor.fetchall()
+
+        if backlog_rows: #show backlog if exists
+            print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
+            while True:
+                show_backlog = input("Would you like to see your backlog first? (Y/N): ").strip().upper()
+                if show_backlog in ['Y', 'N']:
+                    break
+                print("❌ Please enter Y or N")
+
+            if show_backlog == "Y":
+                print(f"\n📋 Backlog - Overdue Tasks")
+                print("-" * 60)
+                for row in backlog_rows:
+                    (app_id, job_title, company, next_action,
+                    check_date, current_status, follow_up_date, interview_date,
+                    interview_time, second_interview_date, final_interview_date) = row
+
+                    print(f"📌 {job_title} @ {company}")
+                    if next_action:
+                        print(f"   → Task: {next_action.replace('_', ' ').title()}")
+                    
+                    overdue_dates = [] # show which date was overdue
+                    if check_date and check_date < today:
+                        overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
+                    if follow_up_date and follow_up_date < today:
+                        overdue_dates.append(f"Follow up: {follow_up_date.strftime('%B %d, %Y')}")
+                    if interview_date and interview_date < today:
+                        overdue_dates.append(f"Interview: {interview_date.strftime('%B %d, %Y')}")
+                    if second_interview_date and second_interview_date < today:
+                        overdue_dates.append(f"2nd Interview: {second_interview_date.strftime('%B %d, %Y')}")
+                    if final_interview_date and final_interview_date < today:
+                        overdue_dates.append(f"Final Interview: {final_interview_date.strftime('%B %d, %Y')}")
+                    
+                    if overdue_dates:
+                        print(f"   → Overdue: {', '.join(overdue_dates)}")
+                    print()
+                print("-" * 60)
+
+        # today's current tasks
         query = """
             SELECT id, job_title, company, next_action,
                check_application_status, application_status, next_follow_up_date,
@@ -108,7 +161,7 @@ while True:
             print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
             print("-" * 60)
 
-            backlog_tasks = []  # store incomplete tasks
+            backlog_tasks = []  # store any incomplete tasks
 
             for row in rows:
                 (app_id, job_title, company, next_action,
@@ -139,8 +192,7 @@ while True:
                         break
                     print("❌ Please enter Y or N")
 
-                if field == "Y":
-                    # automate status based on current next_action
+                if field == "Y": # automate status based on current next_action
                     auto_status_map = {
                         'check_application_status': 'interviewing_first_scheduled',
                         'follow_up_with_contact': 'interviewing_first_scheduled',
@@ -165,17 +217,17 @@ while True:
                     else:
                         print("✅ Task marked as completed\n")
 
-                else:
-                    # add to backlog
+                else: # add the task to backlog if not completed
                     backlog_tasks.append((job_title, company, next_action or "Follow up"))
 
                 # manual status update option
                 while True:
-                    manual = input("✏️ Would you like to manually update the application status? (Y/N): ").strip().upper()
+                    manual = input("✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
                     if manual in ['Y', 'N']:
                         break
                     print("❌ Please enter Y or N")
 
+                #TODO: print all options
                 if manual == "Y":
                     print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
                     new_status = input("Enter new application status: ").strip()
@@ -192,9 +244,9 @@ while True:
                 else:
                     print("⏭️ Skipped status update.\n")
 
-            # show backlog for incomplete tasks
+            # show today's incomplete tasks
             if backlog_tasks:
-                print("\n📋 Backlog - Tasks not completed today:")
+                print("\n📋 Today's Incomplete Tasks:")
                 print("-" * 60)
                 for job_title, company, task in backlog_tasks:
                     print(f"📌 {job_title} @ {company} - {task}")
