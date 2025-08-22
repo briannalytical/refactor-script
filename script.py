@@ -409,6 +409,42 @@ while True:
                 WHERE id = %s;
             """, (app_id,))
             app_details = cursor.fetchone()
+            
+            if app_details:
+                job_title, company, status = app_details
+                print(f"\n⚠️  You are about to delete:")
+                print(f"   Job: {job_title}")
+                print(f"   Company: {company}")
+                print(f"   Status: {status}")
+                
+                while True:
+                    confirm1 = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
+                    if confirm1 in ['Y', 'N']:
+                        break
+                    print("❌ Please enter Y or N")
+        
+                if input == "Y":
+                    while True:
+                        input = input("This action cannot be undone. Type 'DELETE' to confirm: ").strip()
+                        if input == "DELETE":
+                            break
+                        elif input.upper() == "N" or input.upper() == "NO":
+                            print("❌ Deletion cancelled.")
+                            break
+                        else:
+                            print("❌ Please type 'DELETE' exactly to confirm, or 'N' to cancel")
+            
+                    if input == "DELETE":
+                        cursor.execute("DELETE FROM application_tracking WHERE id = %s;", (app_id,))
+                        conn.commit()
+                        print(f"✅ Application for {job_title} @ {company} has been deleted.")
+                    else:
+                        print("❌ Deletion cancelled.")
+                else:
+                    print("❌ Deletion cancelled.")
+            else:
+                print("❌ Application not found.")
+
 
     # TIPS: tips for job seekers
     elif choice == "TIPS":
