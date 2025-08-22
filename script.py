@@ -36,6 +36,7 @@ while True:
     show_main_menu()
     choice = input("\nAction: ").strip().upper()
 
+
     # VIEW: view applications
     if choice == "VIEW":
         while True:
@@ -84,6 +85,7 @@ while True:
                             print(f"{col_clean}: {val}")
 
                         print("-" * 60)
+
 
     #TASKS: check follow-up tasks information
     elif choice == "TASKS":
@@ -252,6 +254,7 @@ while True:
                     print(f"📌 {job_title} @ {company} - {task}")
                 print("-" * 60)
 
+
     # ENTER: individual application entry
     elif choice == "ENTER":
         print("\nEnter your new application details:")
@@ -272,6 +275,7 @@ while True:
 
         conn.commit()
         print("\n✅ Application added! I'll remind you when you have tasks related to this job. 😊")
+
 
     # UPDATE: make updates to existing applications
     elif choice == "UPDATE":
@@ -298,8 +302,8 @@ while True:
                 print("❌ Please enter a valid number.")
 
         print("\nWhat do you want to update?")
-        print("1. Status")
-        print("2. Follow-up contact info")
+        print("1. Application status")
+        print("2. Update contact info")
         print("3. Schedule interview")
         print("4. Notes")
         
