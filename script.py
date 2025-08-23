@@ -34,27 +34,27 @@ show_intro()
 
 while True:
     show_main_menu()
-    choice = input("\nAction: ").strip().upper()
+    field = input("\nAction: ").strip().upper()
 
 
     # VIEW: view applications
-    if choice == "VIEW":
+    if selection == "VIEW":
         while True:
-            field = input("\nDo you want to see only active applications? (Y/N) Press E to exit: ").strip().upper()
+            selection = input("\nDo you want to see only active applications? (Y/N) Press E to exit: ").strip().upper()
 
-            if field == "Y":
+            if selection == "Y":
                 query = "SELECT * FROM application_tracking WHERE application_status != 'rejected'" 
                 break
-            elif field == "N":
+            elif selection == "N":
                 query = "SELECT * FROM application_tracking"
                 break
-            elif field == "E":
+            elif selection == "E":
                 break
             else:
                 print("❌ Please make a valid entry (Y/N/E)")
                 continue
 
-        if field != "E":
+        if selection != "E":
             cursor.execute(query)
             rows = cursor.fetchall()
             column_names = [desc[0] for desc in cursor.description]
@@ -88,7 +88,7 @@ while True:
 
 
     #TASKS: check follow-up tasks information
-    elif choice == "TASKS":
+    elif selection == "TASKS":
         backlog_query = """
             SELECT id, job_title, company, next_action,
                check_application_status, application_status, next_follow_up_date,
@@ -104,15 +104,15 @@ while True:
         cursor.execute(backlog_query, (today, today, today, today, today))
         backlog_rows = cursor.fetchall()
 
-        if backlog_rows: #show backlog if exists
-            print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
+        if field: #show backlog if exists
+            print(f"\n📋 You have {len(field)} overdue task(s) in your backlog!")
             while True:
-                show_backlog = input("Would you like to see your backlog first? (Y/N): ").strip().upper()
-                if show_backlog in ['Y', 'N']:
+                selection = input("Would you like to see your backlog first? (Y/N): ").strip().upper()
+                if selection in ['Y', 'N']:
                     break
                 print("❌ Please enter Y or N")
 
-            if show_backlog == "Y":
+            if selection == "Y":
                 print(f"\n📋 Backlog - Overdue Tasks")
                 print("-" * 60)
                 for row in backlog_rows:
@@ -194,7 +194,7 @@ while True:
                         break
                     print("❌ Please enter Y or N")
 
-                if field == "Y": # automate status based on current next_action
+                if selection == "Y": # automate status based on current next_action
                     auto_status_map = {
                         'check_application_status': 'interviewing_first_scheduled',
                         'follow_up_with_contact': 'interviewing_first_scheduled',
@@ -224,13 +224,13 @@ while True:
 
                 # manual status update option
                 while True:
-                    manual = input("✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
-                    if manual in ['Y', 'N']:
+                    selection = input("✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
+                    if selection in ['Y', 'N']:
                         break
                     print("❌ Please enter Y or N")
 
                 #TODO: print all options
-                if manual == "Y":
+                if selection == "Y":
                     print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
                     new_status = input("Enter new application status: ").strip()
                     if new_status:
@@ -256,7 +256,7 @@ while True:
 
 
     # ENTER: individual application entry
-    elif choice == "ENTER":
+    elif selection == "ENTER":
         print("\nEnter your new application details:")
         job_title = input("Job title: ").strip()
         company = input("Company: ").strip()
@@ -278,7 +278,7 @@ while True:
 
 
     # UPDATE: make updates to existing applications
-    elif choice == "UPDATE":
+    elif selection == "UPDATE":
         cursor.execute("SELECT id, job_title, company FROM application_tracking ORDER BY id;")
         apps = cursor.fetchall()
 
@@ -309,12 +309,12 @@ while True:
         print("5. Delete Entry")
         
         while True:
-            field_choice = input("Field to update (1-4): ").strip()
-            if field_choice in ['1', '2', '3', '4', '5']:
+            selection = input("Field to update (1-5): ").strip()
+            if selection in ['1', '2', '3', '4', '5']:
                 break
             print("❌ Please enter 1, 2, 3, 4, or 5")
 
-        if field_choice == "1":
+        if selection == "1":
             status_options = {
                 "Applied": "applied",
                 "First Interview Scheduled": "interviewing_first_scheduled",
@@ -337,10 +337,10 @@ while True:
                 print(f"{i}. {label}")
 
             while True:
-                choice_input = input("Enter the number or status name: ").strip()
+                selection = input("Enter the number or status name: ").strip()
                 new_status = None
 
-                if choice_input.isdigit():
+                if selection.isdigit():
                     index = int(choice_input) - 1
                     if 0 <= index < len(labels):
                         new_status = status_options[labels[index]]
@@ -363,7 +363,7 @@ while True:
             conn.commit()
             print("✅ Status updated.")
 
-        elif field_choice == "2":
+        elif selection == "2":
             contact_name = input("Contact name: ").strip()
             contact_details = input("Contact email/phone/URL: ").strip()
             cursor.execute("""
@@ -375,7 +375,7 @@ while True:
             conn.commit()
             print("✅ Follow-up contact updated.")
 
-        elif field_choice == "3":
+        elif selection == "3":
             interview_date = input("Enter interview date (YYYY-MM-DD): ").strip()
             interview_time = input("Enter interview time (HH:MM): ").strip()
             interview_name = input("Interviewer name: ").strip()
@@ -392,7 +392,7 @@ while True:
             conn.commit()
             print("✅ Interview details updated.")
 
-        elif field_choice == "4":
+        elif selection == "4":
             new_notes = input("Enter your updated job notes: ").strip()
             cursor.execute("""
                 UPDATE application_tracking
@@ -402,7 +402,7 @@ while True:
             conn.commit()
             print("✅ Notes updated.")
         
-        elif field_choice == "5":
+        elif selection == "5":
             cursor.execute("""
                 SELECT job_title, company, application_status 
                 FROM application_tracking 
@@ -447,14 +447,14 @@ while True:
 
 
     # TIPS: tips for job seekers
-    elif choice == "TIPS":
+    elif selection == "TIPS":
         print("\n💡 Job Search Tips:")
         print("📩 FOLLOW UP! You are 78% more likely to land an interview if you reach out to a recruiter or hiring manager after you apply.")
         print("✏️ TAKE NOTES! You should already know why you want to work for the company and about their mission BEFORE speaking with someone from the company.")
         print("🔑 Confidence is Key! You know you deserve this job and focus on YOU, not anyone else!")
         print("💻 Keep applying, keep trying. It will not be this way forever.")
 
-    elif choice == "BYE":
+    elif selection == "BYE":
         print("👋 Goodbye! Check back again soon!")
         break
     
