@@ -32,6 +32,21 @@ def show_main_menu():
     
 show_intro()
 
+def number_selection_invalid():
+    if(true):
+        print("😭 Invalid number selection. Please select from available options.")
+    return false
+
+def letter_selection_invalid():
+    if(true):
+        print("😭 This letter does not exist in this context. Try choosing from the available options.")
+    return false
+
+def yes_or_no_selection_invalid():
+    if(true):
+        print("Girl just pick yes, no, or exit. 😭")
+    return false
+
 while True:
     show_main_menu()
     field = input("\nAction: ").strip().upper()
