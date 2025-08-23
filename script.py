@@ -418,23 +418,23 @@ while True:
                 print(f"   Status: {status}")
                 
                 while True:
-                    input = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
-                    if input in ['Y', 'N']:
+                    selection = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
+                    if selection in ['Y', 'N']:
                         break
                     print("❌ Please enter Y or N")
         
-                if input == "Y":
+                if selection == "Y":
                     while True:
-                        input = input("This action cannot be undone. Type 'DELETE' to confirm: ").strip()
+                        selection = input("This action cannot be undone. Type 'DELETE' to confirm: ").strip()
                         if input == "DELETE":
                             break
-                        elif input.upper() == "N" or input.upper() == "NO":
+                        elif selection.upper() == "N" or selection.upper() == "NO":
                             print("❌ Deletion cancelled.")
                             break
                         else:
                             print("❌ Please type 'DELETE' exactly to confirm, or 'N' to cancel")
             
-                    if input == "DELETE":
+                    if selection == "DELETE":
                         cursor.execute("DELETE FROM application_tracking WHERE id = %s;", (app_id,))
                         conn.commit()
                         print(f"✅ Application for {job_title} @ {company} has been deleted.")
