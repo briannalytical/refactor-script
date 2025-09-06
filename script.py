@@ -32,24 +32,24 @@ def show_main_menu():
     
 show_intro()
 
-def number_selection_invalid():
-    if(true):
+def number_selection_invalid(self):
+    if(True):
         print("😭 Invalid number selection. Please select from available options.")
     return false
 
-def letter_selection_invalid():
-    if(true):
+def letter_selection_invalid(self):
+    if(True):
         print("😭 This letter does not exist in this context. Try choosing from the available options.")
     return false
 
-def yes_or_no_selection_invalid():
-    if(true):
+def yes_or_no_selection_invalid(self):
+    if(True):
         print("Girl just pick yes, no, or exit. 😭")
     return false
 
 while True:
     show_main_menu()
-    field = input("\nAction: ").strip().upper()
+    selection = input("\nAction: ").strip().upper()
 
 
     # VIEW: view applications
@@ -66,7 +66,7 @@ while True:
             elif selection == "E":
                 break
             else:
-                print("❌ Please make a valid entry (Y/N/E)")
+                self.letter_selection_invalid()
                 continue
 
         if selection != "E":
@@ -125,7 +125,9 @@ while True:
                 selection = input("Would you like to see your backlog first? (Y/N): ").strip().upper()
                 if selection in ['Y', 'N']:
                     break
-                print("❌ Please enter Y or N")
+                else:
+                    self.yes_or_no_selection_invalid()
+                    continue
 
             if selection == "Y":
                 print(f"\n📋 Backlog - Overdue Tasks")
