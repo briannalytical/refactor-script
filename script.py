@@ -117,7 +117,8 @@ while True:
         backlog_rows = cursor.fetchall()
 
         if backlog_rows: #show backlog if exists
-            print(f"\n📋 You have {len(field)} overdue task(s) in your backlog!")
+            print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
+
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/E): ").strip().upper()
                 if selection in ['Y', 'N']:
@@ -203,8 +204,8 @@ while True:
 
                 # task completion
                 while True:
-                    field = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
-                    if field in ['Y', 'N']:
+                    selection = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
+                    if selection in ['Y', 'N']:
                         break
                     else:
                         yes_or_no_selection_invalid()
@@ -446,7 +447,7 @@ while True:
                 if selection == "Y":
                     while True:
                         selection = input("This action cannot be undone. Type 'DELETE' to confirm: ").strip()
-                        if input == "DELETE":
+                        if selection == "DELETE":
                             break
                         elif selection.upper() == "N" or selection.upper() == "NO":
                             print("❌ Deletion cancelled.")
