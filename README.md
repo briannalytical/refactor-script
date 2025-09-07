@@ -1,223 +1,301 @@
-Setup Guide
+# Stack Trace Job Application Tracker
 
-This guide will help you set up the local development environment for this Python project with PostgreSQL database.
+A Python-based command-line tool to help you track job applications, manage follow-ups, and schedule interviews. Stay organized during your job search with automated reminders and task management!
 
-Prerequisites
-Python 3.8 or higher
-Git (for cloning the repository)
+## Features
 
-Setup Instructions
+- Track job applications with detailed status management
+- Automated follow-up reminders and task scheduling
+- Interview scheduling and preparation notes
+- Daily task view with backlog management
+- Contact information management
+- Application statistics and viewing
 
-macOS Setup
-1. Install PostgreSQL
-Option A: Using Homebrew (Recommended)
-bash# Install Homebrew if you don't have it
+## Prerequisites
+
+- Python 3.7 or higher
+- PostgreSQL database
+- Git (optional, for cloning)
+
+## Installation Guide
+
+### For Windows
+
+#### 1. Install Python
+1. Download Python from [python.org](https://www.python.org/downloads/)
+2. **Important**: Check "Add Python to PATH" during installation
+3. Verify installation:
+   ```cmd
+   python --version
+   pip --version
+   ```
+
+#### 2. Install PostgreSQL
+1. Download PostgreSQL from [postgresql.org](https://www.postgresql.org/download/windows/)
+2. Run the installer and remember your password for the `postgres` user
+3. Default settings are usually fine (port 5432)
+4. Add PostgreSQL to your PATH or use the full path to `psql`
+
+#### 3. Set up the Database
+1. Open Command Prompt as Administrator
+2. Connect to PostgreSQL:
+   ```cmd
+   psql -U postgres -h localhost
+   ```
+3. Enter your postgres password when prompted
+4. Create the database and table:
+   ```sql
+   CREATE DATABASE job_tracker;
+   \c job_tracker;
+   
+   CREATE TABLE application_tracking (
+       id SERIAL PRIMARY KEY,
+       job_title VARCHAR(255) NOT NULL,
+       company VARCHAR(255) NOT NULL,
+       application_software VARCHAR(100),
+       job_notes TEXT,
+       follow_up_contact_name VARCHAR(255),
+       follow_up_contact_details TEXT,
+       application_status VARCHAR(50) DEFAULT 'applied',
+       next_action VARCHAR(100),
+       check_application_status DATE,
+       next_follow_up_date DATE,
+       interview_date DATE,
+       interview_time TIME,
+       interviewer_name VARCHAR(255),
+       interview_prep_notes TEXT,
+       second_interview_date DATE,
+       final_interview_date DATE,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+   ```
+5. Exit PostgreSQL:
+   ```sql
+   \q
+   ```
+
+#### 4. Install Python Dependencies
+```cmd
+pip install psycopg2-binary
+```
+
+### For macOS
+
+#### 1. Install Python
+Python usually comes pre-installed, but you may want a newer version:
+
+**Option A: Using Homebrew (Recommended)**
+```bash
+# Install Homebrew if you don't have it
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Install PostgreSQL
-brew install postgresql@15
+# Install Python
+brew install python
+```
 
-# Start PostgreSQL service
-brew services start postgresql@15
+**Option B: Download from python.org**
+1. Download from [python.org](https://www.python.org/downloads/)
+2. Run the installer
 
-# Add PostgreSQL to PATH (add to your ~/.zshrc or ~/.bash_profile)
-echo 'export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-Option B: Using PostgreSQL Installer
+Verify installation:
+```bash
+python3 --version
+pip3 --version
+```
 
-Download from postgresql.org
-Run the installer and follow the setup wizard
-Remember the password you set for the postgres user
+#### 2. Install PostgreSQL
 
-2. Create Database and User
-bash# Connect to PostgreSQL
-psql postgres
+**Option A: Using Homebrew (Recommended)**
+```bash
+brew install postgresql
+brew services start postgresql
+```
 
-# Create a new database
-CREATE DATABASE your_project_db;
+**Option B: Download PostgreSQL**
+1. Download from [postgresql.org](https://www.postgresql.org/download/macos/)
+2. Run the installer
 
-# Create a new user (optional, you can use postgres user)
-CREATE USER your_username WITH PASSWORD 'your_password';
+#### 3. Set up the Database
+1. Open Terminal
+2. Connect to PostgreSQL:
+   ```bash
+   psql postgres
+   ```
+3. Create the database and table:
+   ```sql
+   CREATE DATABASE job_tracker;
+   \c job_tracker;
+   
+   CREATE TABLE application_tracking (
+       id SERIAL PRIMARY KEY,
+       job_title VARCHAR(255) NOT NULL,
+       company VARCHAR(255) NOT NULL,
+       application_software VARCHAR(100),
+       job_notes TEXT,
+       follow_up_contact_name VARCHAR(255),
+       follow_up_contact_details TEXT,
+       application_status VARCHAR(50) DEFAULT 'applied',
+       next_action VARCHAR(100),
+       check_application_status DATE,
+       next_follow_up_date DATE,
+       interview_date DATE,
+       interview_time TIME,
+       interviewer_name VARCHAR(255),
+       interview_prep_notes TEXT,
+       second_interview_date DATE,
+       final_interview_date DATE,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+   ```
+4. Exit PostgreSQL:
+   ```sql
+   \q
+   ```
 
-# Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE your_project_db TO your_username;
+#### 4. Install Python Dependencies
+```bash
+pip3 install psycopg2-binary
+```
 
-# Exit PostgreSQL
-\q
-3. Set up Python Environment
-bash# Clone the repository
-git clone <your-repo-url>
-cd <your-project-directory>
+## Configuration
 
-# Create virtual environment
-python3 -m venv venv
+### Database Connection Setup
 
-# Activate virtual environment
-source venv/bin/activate
+1. Open the `job_tracker.py` file in your text editor
+2. Update the database connection parameters:
+   ```python
+   conn = psycopg2.connect(
+       dbname="job_tracker",      # Change if you used a different database name
+       user="postgres",           # Change if you use a different username
+       password="your_password_here",  # Replace with your actual password
+       host="localhost",          # Usually localhost
+       port="5432"               # Default PostgreSQL port
+   )
+   ```
 
-# Upgrade pip
-pip install --upgrade pip
+### Security Note
+For production use, consider using environment variables for sensitive information:
 
-# Install dependencies
-pip install -r requirements.txt
-4. Configure Environment Variables
-bash# Create a .env file in the project root
-touch .env
+1. Create a `.env` file (never commit this to version control):
+   ```
+   DB_NAME=job_tracker
+   DB_USER=postgres
+   DB_PASSWORD=your_password_here
+   DB_HOST=localhost
+   DB_PORT=5432
+   ```
 
-# Add the following to .env file
-echo "DB_HOST=localhost" >> .env
-echo "DB_PORT=5432" >> .env
-echo "DB_NAME=your_project_db" >> .env
-echo "DB_USER=your_username" >> .env
-echo "DB_PASSWORD=your_password" >> .env
-Windows Setup
-1. Install PostgreSQL
+2. Install python-dotenv:
+   ```bash
+   pip install python-dotenv
+   ```
 
-Download PostgreSQL installer from postgresql.org
-Run the installer as administrator
-Follow the installation wizard:
+3. Update your script to use environment variables:
+   ```python
+   import os
+   from dotenv import load_dotenv
+   
+   load_dotenv()
+   
+   conn = psycopg2.connect(
+       dbname=os.getenv('DB_NAME'),
+       user=os.getenv('DB_USER'),
+       password=os.getenv('DB_PASSWORD'),
+       host=os.getenv('DB_HOST'),
+       port=os.getenv('DB_PORT')
+   )
+   ```
 
-Choose installation directory (default is fine)
-Select components (ensure PostgreSQL Server and pgAdmin are selected)
-Set data directory (default is fine)
-Set password for the postgres superuser (remember this!)
-Set port (default 5432 is fine)
-Choose locale (default is fine)
+## Running the Application
 
+### Windows
+```cmd
+python job_tracker.py
+```
 
-Complete the installation
+### macOS/Linux
+```bash
+python3 job_tracker.py
+```
 
-2. Add PostgreSQL to PATH
+## Usage Guide
 
-Open System Properties (Right-click "This PC" → Properties → Advanced system settings)
-Click "Environment Variables"
-Under "System Variables", find and select "Path", then click "Edit"
-Click "New" and add: C:\Program Files\PostgreSQL\15\bin (adjust version number if different)
-Click "OK" to close all dialogs
+### Main Menu Options
 
-3. Create Database and User
-cmd# Open Command Prompt or PowerShell as administrator
-# Connect to PostgreSQL (you'll be prompted for the postgres password)
-psql -U postgres -h localhost
+- **VIEW**: View all applications (with option to filter active only)
+- **TASKS**: View today's tasks and manage your backlog
+- **ENTER**: Add a new job application
+- **UPDATE**: Modify existing applications
+- **TIPS**: Helpful job search tips
+- **BYE**: Exit the application
 
-# Create a new database
-CREATE DATABASE your_project_db;
+### Application Statuses
 
-# Create a new user (optional, you can use postgres user)
-CREATE USER your_username WITH PASSWORD 'your_password';
+The tracker supports the following status progression:
+1. Applied
+2. First Interview Scheduled
+3. First Interview Completed
+4. Post First Interview Follow-Up Sent
+5. Second Interview Scheduled
+6. Second Interview Completed
+7. Post Second Interview Follow-Up Sent
+8. Final Interview Scheduled
+9. Final Interview Completed
+10. Post Final Interview Follow-Up Sent
+11. Offer Received
+12. Rejected
 
-# Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE your_project_db TO your_username;
+### Best Practices
 
-# Exit PostgreSQL
-\q
-4. Set up Python Environment
-cmd# Clone the repository
-git clone <your-repo-url>
-cd <your-project-directory>
+1. **Add applications immediately** after applying
+2. **Set follow-up reminders** for 1-2 weeks after applying
+3. **Update status** after each interaction
+4. **Add contact information** when you find recruiters or hiring managers
+5. **Check tasks daily** to stay on top of follow-ups
 
-# Create virtual environment
-python -m venv venv
+## Troubleshooting
 
-# Activate virtual environment
-venv\Scripts\activate
+### Common Issues
 
-# Upgrade pip
-python -m pip install --upgrade pip
+**"ModuleNotFoundError: No module named 'psycopg2'"**
+- Solution: Run `pip install psycopg2-binary`
 
-# Install dependencies
-pip install -r requirements.txt
-5. Configure Environment Variables
-cmd# Create a .env file in the project root
-echo. > .env
+**"psql: command not found" (macOS)**
+- Solution: Add PostgreSQL to your PATH or use the full path: `/Applications/Postgres.app/Contents/Versions/latest/bin/psql`
 
-# Add environment variables to .env file (edit with notepad or your preferred editor)
-notepad .env
-Add the following content to the .env file:
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=your_project_db
-DB_USER=your_username
-DB_PASSWORD=your_password
-Running the Project
-Start the Application
-bash# Make sure your virtual environment is activated
-# macOS/Linux:
-source venv/bin/activate
+**Connection refused errors**
+- Check if PostgreSQL service is running
+- Verify host, port, username, and password in the connection string
+- Make sure the database exists
 
-# Windows:
-venv\Scripts\activate
+**"relation 'application_tracking' does not exist"**
+- Make sure you ran the CREATE TABLE command in the correct database
+- Verify you're connected to the right database with `\c job_tracker`
 
-# Run the main script
-python main.py
-Verify Database Connection
-bash# Test database connection
-python -c "
-import psycopg2
-from dotenv import load_dotenv
-import os
+### Getting Help
 
-load_dotenv()
+1. Check that all prerequisites are installed correctly
+2. Verify your database connection parameters
+3. Make sure PostgreSQL service is running
+4. Try running commands step-by-step to isolate issues
 
-try:
-    conn = psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT'),
-        database=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD')
-    )
-    print('✅ Database connection successful!')
-    conn.close()
-except Exception as e:
-    print(f'❌ Database connection failed: {e}')
-"
-Common Issues and Solutions
-PostgreSQL Issues
-Issue: "psql: command not found"
+## File Structure
 
-macOS: Ensure PostgreSQL is in your PATH or use full path: /opt/homebrew/bin/psql
-Windows: Add PostgreSQL bin directory to your system PATH
+```
+job-tracker/
+├── job_tracker.py          # Main application file
+├── schema.sql             # Database schema file
+├── README.md              # This file
+├── .env                   # Environment variables (optional)
+└── requirements.txt       # Python dependencies (optional)
+```
 
-Issue: "password authentication failed"
+## Contributing
 
-Double-check your username and password
-Ensure the user has proper permissions on the database
+Feel free to submit issues, feature requests, or pull requests to improve this tool!
 
-Issue: "could not connect to server"
+## License
 
-Ensure PostgreSQL service is running:
-
-macOS: brew services start postgresql@15
-Windows: Check Services app for PostgreSQL service
-
-
-
-Python Issues
-Issue: "No module named 'psycopg2'"
-bash# Install the PostgreSQL adapter
-pip install psycopg2-binary
-Issue: Virtual environment not activating
-
-Ensure you're in the correct project directory
-Try creating a new virtual environment if the current one is corrupted
-
-Dependencies
-Make sure your requirements.txt includes:
-psycopg2-binary>=2.9.0
-python-dotenv>=0.19.0
-Environment Variables
-VariableDescriptionExampleDB_HOSTDatabase hostlocalhostDB_PORTDatabase port5432DB_NAMEDatabase nameyour_project_dbDB_USERDatabase usernameyour_usernameDB_PASSWORDDatabase passwordyour_password
-Next Steps
-
-Customize the database schema according to your project needs
-Update the connection parameters in your Python script
-Run any necessary database migrations
-Start developing your application!
-
-Support
-If you encounter any issues during setup, please:
-
-Check the PostgreSQL logs for database-related issues
-Verify all environment variables are correctly set
-Ensure your virtual environment is activated when running Python commands
+This project is open source. Use it freely for your job search success! 🚀
