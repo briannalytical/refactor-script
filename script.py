@@ -39,7 +39,7 @@ def letter_selection_invalid():
     print("😭 This letter does not exist in this context. Try choosing from the available options.")
 
 def yes_or_no_selection_invalid():
-    print("😭 Please selec Y or N.")
+    print("😭 Please select Y or N.")
 
 def yes_no_exit_selection_invalid():
     print("Girl just pick yes, no, or exit. 😭")
@@ -248,22 +248,59 @@ while True:
                         letter_selection_invalid()
                         continue
 
-                #TODO: print all options
+                # manual display of all options to update
                 if selection == "Y":
-                    print("📌 Tip: You can type 'applied', 'interviewing_first_scheduled', etc.")
-                    new_status = input("Enter new application status: ").strip()
-                    if new_status:
-                        cursor.execute("""
-                            UPDATE application_tracking
-                            SET application_status = %s
-                            WHERE id = %s;
-                        """, (new_status, app_id))
-                        conn.commit()
-                        print(f"✅ Status manually updated to: {new_status}\n")
+                   status_options = {
+                       "Applied": "applied",
+                       "First Interview Scheduled": "interviewing_first_scheduled",
+                       "First Interview Completed": "interviewing_first_completed",
+                       "Post First Interview Follow-Up Sent": "interviewing_first_followed_up",
+                       "Second Interview Scheduled": "interviewing_second_scheduled",
+                       "Second Interview Completed": "interviewing_second_completed",
+                       "Post Second Interview Follow-Up Sent": "interviewing_second_followed_up",
+                       "Final Interview Scheduled": "interviewing_final_scheduled",
+                       "Final Interview Completed": "interviewing_final_completed",
+                       "Post Final Interview Follow-Up Sent": "interviewing_final_followed_up",
+                       "Offer Received": "offer_received",
+                       "Rejected": "rejected"
+                   }
+
+                   print("\n📌 Please select the number that corresponds with the status you'd like to update to:")
+                   labels = list(status_options.keys())
+                   
+                   for i, label in enumerate(labels, 1):
+                       print(f"{i}. {label}")
+
+                while True:
+                    selection = input("Enter the number or status name: ").strip()
+                    new_status = None
+
+                    if selection.isdigit():
+                        index = int(selection) - 1
+                        if 0 <= index < len(labels):
+                            new_status = status_options[labels[index]]
+                            break
+                        else:
+                            number_selection_invalid()
+                            continue
                     else:
-                        print("⏭️ No status entered.\n")
-                else:
-                    print("⏭️ Skipped status update.\n")
+                        lower_map = {k.lower(): v for k, v in status_options.items()}
+                        if selection.lower() in lower_map:
+                            new_status = lower_map[selection.lower()]
+                            break
+                        else:
+                            number_selection_invalid()
+                            continue
+
+                cursor.execute("""
+                    UPDATE application_tracking
+                    SET application_status = %s
+                    WHERE id = %s;
+                """, (new_status, app_id))
+                conn.commit()
+                print(f"✅ Status manually updated to: {new_status}\n")
+            else:
+                print("⏭️ Skipped status update.\n")
 
             # show today's incomplete tasks
             if backlog_tasks:
