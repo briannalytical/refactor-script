@@ -116,7 +116,7 @@ while True:
         cursor.execute(backlog_query, (today, today, today, today, today))
         backlog_rows = cursor.fetchall()
 
-        if field: #show backlog if exists
+        if backlog_rows: #show backlog if exists
             print(f"\n📋 You have {len(field)} overdue task(s) in your backlog!")
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/E): ").strip().upper()
