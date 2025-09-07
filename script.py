@@ -44,6 +44,9 @@ def yes_or_no_selection_invalid():
 def yes_no_exit_selection_invalid():
     print("Girl just pick yes, no, or exit. 😭")
 
+def deletion_cancelled():
+    print("❌ Deletion has been cancelled.")
+
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
@@ -479,7 +482,8 @@ while True:
                     selection = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
                     if selection in ['Y', 'N']:
                         break
-                    print("❌ Please enter Y or N")
+                    yes_or_no_selection_invalid()
+                        continue
         
                 if selection == "Y":
                     while True:
@@ -497,9 +501,9 @@ while True:
                         conn.commit()
                         print(f"✅ Application for {job_title} @ {company} has been deleted.")
                     else:
-                        print("❌ Deletion cancelled.")
+                        deletion_cancelled()
                 else:
-                    print("❌ Deletion cancelled.")
+                    deletion_cancelled()
             else:
                 print("❌ Application not found.")
 
