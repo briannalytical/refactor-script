@@ -32,20 +32,17 @@ def show_main_menu():
     
 show_intro()
 
-def number_selection_invalid(self):
-    if(True):
-        print("😭 Invalid number selection. Please select from available options.")
-    return false
+def number_selection_invalid():
+    print("😭 Invalid number selection. Please select from available options.")
 
-def letter_selection_invalid(self):
-    if(True):
-        print("😭 This letter does not exist in this context. Try choosing from the available options.")
-    return false
+def letter_selection_invalid():
+    print("😭 This letter does not exist in this context. Try choosing from the available options.")
 
-def yes_or_no_selection_invalid(self):
-    if(True):
-        print("Girl just pick yes, no, or exit. 😭")
-    return false
+def yes_or_no_selection_invalid():
+    print("😭 Please selec Y or N.")
+
+def yes_no_exit_selection_invalid():
+    print("Girl just pick yes, no, or exit. 😭")
 
 while True:
     show_main_menu()
@@ -66,7 +63,7 @@ while True:
             elif selection == "E":
                 break
             else:
-                self.letter_selection_invalid()
+                letter_selection_invalid()
                 continue
 
         if selection != "E":
@@ -122,11 +119,11 @@ while True:
         if field: #show backlog if exists
             print(f"\n📋 You have {len(field)} overdue task(s) in your backlog!")
             while True:
-                selection = input("Would you like to see your backlog first? (Y/N): ").strip().upper()
+                selection = input("Would you like to see your backlog first? (Y/N/E): ").strip().upper()
                 if selection in ['Y', 'N']:
                     break
                 else:
-                    self.yes_or_no_selection_invalid()
+                    yes_or_no_selection_invalid()
                     continue
 
             if selection == "Y":
@@ -209,7 +206,9 @@ while True:
                     field = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
                     if field in ['Y', 'N']:
                         break
-                    print("❌ Please enter Y or N")
+                    else:
+                        yes_or_no_selection_invalid()
+                        continue
 
                 if selection == "Y": # automate status based on current next_action
                     auto_status_map = {
@@ -244,7 +243,9 @@ while True:
                     selection = input("✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
                     if selection in ['Y', 'N']:
                         break
-                    print("❌ Please enter Y or N")
+                    else:
+                        letter_selection_invalid()
+                        continue
 
                 #TODO: print all options
                 if selection == "Y":
@@ -313,10 +314,8 @@ while True:
                 # Verify the ID exists
                 if any(app[0] == app_id for app in apps):
                     break
-                else:
-                    print("❌ Invalid application number. Please try again.")
             except ValueError:
-                print("❌ Please enter a valid number.")
+                number_selection_invalid()
 
         print("\nWhat do you want to update?")
         print("1. Application status")
@@ -329,7 +328,9 @@ while True:
             selection = input("Field to update (1-5): ").strip()
             if selection in ['1', '2', '3', '4', '5']:
                 break
-            print("❌ Please enter 1, 2, 3, 4, or 5")
+            else:
+                number_selection_invalid()
+                continue
 
         if selection == "1":
             status_options = {
@@ -358,19 +359,21 @@ while True:
                 new_status = None
 
                 if selection.isdigit():
-                    index = int(choice_input) - 1
+                    index = int(selection) - 1
                     if 0 <= index < len(labels):
                         new_status = status_options[labels[index]]
                         break
                     else:
-                        print("❌ Invalid number")
+                        number_selection_invalid()
+                        continue
                 else:
                     lower_map = {k.lower(): v for k, v in status_options.items()}
-                    if choice_input.lower() in lower_map:
-                        new_status = lower_map[choice_input.lower()]
+                    if selection.lower() in lower_map:
+                        new_status = lower_map[selection.lower()]
                         break
                     else:
-                        print("❌ Invalid status name")
+                        number_selection_invalid()
+                        continue
 
             cursor.execute("""
                 UPDATE application_tracking
