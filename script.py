@@ -483,7 +483,6 @@ while True:
                     if selection in ['Y', 'N']:
                         break
                     yes_or_no_selection_invalid()
-                        continue
         
                 if selection == "Y":
                     while True:
