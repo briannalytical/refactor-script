@@ -338,7 +338,7 @@ while True:
 
     # UPDATE: make updates to existing applications
     elif selection == "UPDATE":
-        cursor.execute("SELECT id, job_title, company FROM application_tracking ORDER BY id;")
+        cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY id;")
         apps = cursor.fetchall()
 
         if not apps:
