@@ -17,7 +17,7 @@ today = date.today()
 
 # menu
 def show_intro():
-    print("\n📋 Hello! Welcome to Stack Trace Job Application Tracker! I hope you will find this tool useful! 🥰")
+    print("\n📋 Hello! Welcome to Refactor, your job application tracker! I hope you will find this tool useful! 🥰")
     print("It's tough out there, but tracking your applications doesn't have to be!")
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
 
@@ -58,10 +58,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press E to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected'" 
+                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' ORDER BY company" 
                 break
             elif selection == "N":
-                query = "SELECT * FROM application_tracking"
+                query = "SELECT * FROM application_tracking ORDER BY company"
                 break
             elif selection == "E":
                 break
@@ -338,7 +338,7 @@ while True:
 
     # UPDATE: make updates to existing applications
     elif selection == "UPDATE":
-        cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY id;")
+        cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY company;")
         apps = cursor.fetchall()
 
         if not apps:
@@ -347,7 +347,7 @@ while True:
 
         print("\n--- Existing Applications ---")
         for app in apps:
-            print(f"{app[0]}: {app[1]} @ {app[2]}")
+            print(f"{app[0]}: {app[2]} - {app[1]}")
 
         while True:
             try:
