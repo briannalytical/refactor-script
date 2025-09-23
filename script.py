@@ -54,6 +54,7 @@ while True:
 
     #TODO: display first, then print details
     #TODO: change priority print text
+    #TODO: check_application_status clean up text
     # VIEW: view applications
     if selection == "VIEW":
         while True:
@@ -105,12 +106,13 @@ while True:
 
 
     #TODO: display and order by priority
+    #TODO: automation for follow-up post interview
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         backlog_query = """
             SELECT id, job_title, company, next_action,
                check_application_status, application_status, next_follow_up_date,
-               interview_date, interview_time, second_interview_date, final_interview_date
+               interview_date, interview_time, second_interview_date, final_interview_date, is_priority
             FROM application_tracking
             WHERE (check_application_status::DATE < %s AND check_application_status IS NOT NULL)
             OR (next_follow_up_date::DATE < %s AND next_follow_up_date IS NOT NULL)
@@ -353,6 +355,8 @@ while True:
 
 
     # UPDATE: make updates to existing applications
+    #TODO: make update for priority
+    #TODO: handle invalid selection
     elif selection == "UPDATE":
         cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY company;")
         apps = cursor.fetchall()
