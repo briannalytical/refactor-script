@@ -52,6 +52,8 @@ while True:
     selection = input("\nAction: ").strip().upper()
 
 
+    #TODO: display first, then print details
+    #TODO: change priority print text
     # VIEW: view applications
     if selection == "VIEW":
         while True:
@@ -102,6 +104,7 @@ while True:
                         print("-" * 60)
 
 
+    #TODO: display and order by priority
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         backlog_query = """
@@ -321,6 +324,18 @@ while True:
         company = input("Company: ").strip()
         software = input("How did you apply (LinkedIn, Workday, Greenhouse, company website etc): ").strip()
         notes = input("Any notes about this role? (optional): ").strip()
+        while True:
+            priority_input = input("Mark this job as priority? (Y/N): ").strip().upper()
+            if priority_input == "Y":
+                is_priority = True
+                break
+            elif priority_input == "N":
+                is_priority = False
+                break
+            else:
+                yes_or_no_selection_invalid()
+                continue
+    
         print("Optional now, but do your research! 🔎")
         contact_name = input("Contact Name: ").strip()
         contact_details = input("Contact Details: ").strip()
@@ -328,9 +343,10 @@ while True:
         cursor.execute("""
             INSERT INTO application_tracking (
                 job_title, company, application_software, job_notes,
-                follow_up_contact_name, follow_up_contact_details
-            ) VALUES (%s, %s, %s, %s, %s, %s);
-        """, (job_title, company, software or None, notes or None, contact_name or None, contact_details or None))
+                follow_up_contact_name, follow_up_contact_details, is_priority
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s);
+        """, (job_title, company, software or None, notes or None, 
+          contact_name or None, contact_details or None, is_priority))
 
         conn.commit()
         print("\n✅ Application added! I'll remind you when you have tasks related to this job. 😊")
