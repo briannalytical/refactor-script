@@ -47,6 +47,9 @@ def yes_no_exit_selection_invalid():
 def deletion_cancelled():
     print("❌ Deletion has been cancelled.")
 
+def e_to_exit():
+    show_main_menu()
+
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
@@ -82,27 +85,55 @@ while True:
             else:
                 print("\n📄 Applications")
                 print("=" * 60)
-                
+    
+                # Display summary list
                 for row in rows:
-                    # pair column names with values and exclude 'id' and empty/null values
-                    display_fields = [
-                        (col, val) for col, val in zip(column_names, row)
-                        if col != "id" and val not in (None, '')
-                    ]
+                    app_id, job_title, company = row[0], row[1], row[2]  # Adjust indices based on your SELECT
+                    print(f"{app_id}: {job_title} @ {company}")
+    
+                    print("=" * 60)
+    
+                        # User selection for details
+                    while True:
+                        selection = input("\nEnter application ID to view details, or press E to exit: ").strip().upper()
+        
+                        if selection == "E":
+                            e_to_exit()
+                            break
+                        else:
+                            selected_id = int(selection)
+                            # Find the selected application in rows
+                            selected_row = None
+                            for row in rows:
+                                if row[0] == selected_id:  # row[0] should be the ID
+                                    selected_row = row
+                                    break
+            
+                                if selected_row:
+                                    print(f"\n📄 Application Details - ID {selected_id}")
+                                    print("=" * 60)
+                                    # Display all fields for selected application
+                                    display_fields = [
+                                    (col, val) for col, val in zip(column_names, selected_row)
+                                        if col != "id" and val not in (None, '')
+                                        ]
 
-                    if display_fields:
-                        for col, val in display_fields:
-                            # format dates and times
-                            if isinstance(val, datetime.date):
-                                val = val.strftime("%B %d, %Y")
-                            elif isinstance(val, datetime.time):
-                                val = val.strftime("%I:%M %p")
+                                if display_fields:
+                                    for col, val in display_fields:
+                                    # Format dates and times
+                                        if isinstance(val, datetime.date):
+                                            val = val.strftime("%B %d, %Y")
+                                        elif isinstance(val, datetime.time):
+                                            val = val.strftime("%I:%M %p")
 
-                            # column name formatting
-                            col_clean = col.replace('_', ' ').title()
-                            print(f"{col_clean}: {val}")
+                                        # Column name formatting
+                                        col_clean = col.replace('_', ' ').title()
+                                        print(f"{col_clean}: {val}")
 
-                        print("-" * 60)
+                                        print("-" * 60)
+                else:
+                    number_selection_invalid()
+
 
 
     #TODO: display and order by priority
