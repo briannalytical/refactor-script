@@ -65,10 +65,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press E to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' ORDER BY company" 
+                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' date_applied DESC, company ASC" 
                 break
             elif selection == "N":
-                query = "SELECT * FROM application_tracking ORDER BY company"
+                query = "SELECT * FROM application_tracking ORDER BY date_applied DESC, company ASC"
                 break
             elif selection == "E":
                 break
@@ -86,60 +86,57 @@ while True:
             else:
                 print("\n📄 Applications")
                 print("=" * 60)
-    
-                # Display summary list
+                # display all applications
                 for row in rows:
                     app_id, job_title, company = row[0], row[1], row[2]
                     print(f"{app_id}: {job_title} @ {company}")
-
                     print("=" * 60)
 
-                    # User selection for details (OUTSIDE the for loop)
+                # select application id
                 while True:
                     selection = input("\nEnter application ID to view details, or press E to exit: ").strip().upper()
-    
                     if selection == "E":
                         e_to_exit()
                         break
     
                     try:
                         selected_id = int(selection)
-                        # Find the selected application
+                        # find selected application
                         selected_row = None
                         for row in rows:
                             if row[0] == selected_id:
                                 selected_row = row
                                 break
         
-                            # Display details (AFTER the search loop)
-                            if selected_row:
-                                print(f"\n📄 Application Details - ID {selected_id}")
-                                print("=" * 60)
-                            # Display all fields for selected application
+                        # display application details
+                        if selected_row:
+                            print(f"\n📄 Application Details: {selected_id}")
+                            print("=" * 60)
+
+                            # display all fields for selected application
                             display_fields = [
-                            (col, val) for col, val in zip(column_names, selected_row)
-                            if col != "id" and val not in (None, '')
-                            ]
+                                (col, val) for col, val in zip(column_names, selected_row)
+                                if col != "id" and val not in (None, '')
+                                ]
 
                             if display_fields:
                                 for col, val in display_fields:
-                                # Format dates and times
+                                    # date and time formatting
                                     if isinstance(val, datetime.date):
                                         val = val.strftime("%B %d, %Y")
                                     elif isinstance(val, datetime.time):
                                         val = val.strftime("%I:%M %p")
 
-                                    # Column name formatting
+                                    # column name formatting
                                     col_clean = col.replace('_', ' ').title()
                                     print(f"{col_clean}: {val}")
 
                                     print("-" * 60)
-                            else:
-                                number_selection_invalid()
+                        else:
+                            number_selection_invalid()
             
                     except ValueError:
                         number_selection_invalid()
-
 
 
     #TODO: display and order by priority
