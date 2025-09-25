@@ -21,6 +21,7 @@ def show_intro():
     print("It's tough out there, but tracking your applications doesn't have to be!")
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
 
+#TODO: e to exit at every point
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -55,8 +56,8 @@ while True:
     selection = input("\nAction: ").strip().upper()
 
 
-    #TODO: display first, then print details
-    #TODO: change priority print text
+    #TODO: then print details
+    #TODO: add priority print text
     #TODO: check_application_status clean up text
     # VIEW: view applications
     if selection == "VIEW":
