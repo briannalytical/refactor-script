@@ -22,9 +22,8 @@ def show_intro():
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
     print("You can press X + enter at any point to return to the main menu!")
 
-#TODO: x to exit at every point
-#TODO: add \n for spacing
-#TODO: main menu loops twice
+    #TODO: x to exit at every point
+    #TODO: add \n for spacing throughout
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -37,23 +36,22 @@ def show_main_menu():
 show_intro()
 
 def number_selection_invalid():
-    print("😭 Invalid number selection. Please select from available options.")
+    print("\n😭 Invalid number selection. Please select from available options.")
 
 def letter_selection_invalid():
-    print("😭 This letter does not exist in this context. Try choosing from the available options.")
+    print("\n😭 This letter does not exist in this context. Try choosing from the available options.")
 
 def yes_or_no_selection_invalid():
-    print("😭 Please select Y or N.")
+    print("\n😭 Please select Y or N.")
 
 def yes_no_exit_selection_invalid():
-    print("Girl just pick yes, no, or eXit. 😭")
+    print("\nGirl just pick yes, no, or eXit. 😭")
 
 def deletion_cancelled():
-    print("❌ Deletion has been cancelled.")
+    print("\n❌ Deletion has been cancelled.")
 
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
-    show_main_menu()
 
 while True:
     show_main_menu()
@@ -68,17 +66,18 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' ORDER BY date_applied DESC, company ASC"
+                query = "SELECT company, job_title, id FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "N":
-                query = "SELECT * FROM application_tracking ORDER BY date_applied DESC, company ASC"
+                query = "SELECT company, job_title, id FROM application_tracking ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "X":
+                x_to_exit()
                 break
             else:
                 letter_selection_invalid()
                 continue
-
+    #TODO: Print job ids correctly
         if selection != "X":
             cursor.execute(query)
             rows = cursor.fetchall()
@@ -91,14 +90,14 @@ while True:
                 print("=" * 60)
                 # display all applications
                 for row in rows:
-                    app_id, job_title, company = row[0], row[1], row[2]
-                    print(f"{app_id}: {job_title} @ {company}")
+                    company, job_title, app_id = row[0], row[1], row[2]
+                    print(f"{company}: {job_title} ({app_id})")
                     print("=" * 60)
 
                 # select application id
                 while True:
                     selection = input("\nEnter application ID to view details, or press X to exit: ").strip().upper()
-                    if selection == "E":
+                    if selection == "X":
                         x_to_exit()
                         break
     
@@ -107,7 +106,7 @@ while True:
                         # find selected application
                         selected_row = None
                         for row in rows:
-                            if row[0] == selected_id:
+                            if row[2] == selected_id:
                                 selected_row = row
                                 break
         
@@ -165,12 +164,12 @@ while True:
             print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
 
             while True:
-                selection = input("Would you like to see your backlog first? (Y/N/E): ").strip().upper()
+                selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
                 if selection in ['Y', 'N']:
                     break
                 else:
-                    yes_or_no_selection_invalid()
-                    continue
+                    x_to_exit()
+                    break
 
             if selection == "Y":
                 print(f"\n📋 Backlog - Overdue Tasks")
@@ -178,7 +177,7 @@ while True:
                 for row in backlog_rows:
                     (app_id, job_title, company, next_action,
                     check_date, current_status, follow_up_date, interview_date,
-                    interview_time, second_interview_date, final_interview_date) = row
+                    interview_time, second_interview_date, final_interview_date, is_priority) = row
 
                     print(f"📌 {job_title} @ {company}")
                     if next_action:
@@ -249,7 +248,7 @@ while True:
 
                 # task completion
                 while True:
-                    selection = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
+                    selection = input("\n✅ Mark this task as completed? (Y/N): ").strip().upper()
                     if selection in ['Y', 'N']:
                         break
                     else:
@@ -277,9 +276,9 @@ while True:
                             WHERE id = %s;
                         """, (new_status, app_id))
                         conn.commit()
-                        print(f"✅ Status auto-updated to: {new_status}\n")
+                        print(f"\n✅ Status auto-updated to: {new_status}\n")
                     else:
-                        print("✅ Task marked as completed\n")
+                        print("\n✅ Task marked as completed\n")
 
                 else: # add the task to backlog if not completed
                     backlog_tasks.append((job_title, company, next_action or "Follow up"))
@@ -343,9 +342,9 @@ while True:
                     WHERE id = %s;
                 """, (new_status, app_id))
                 conn.commit()
-                print(f"✅ Status manually updated to: {new_status}\n")
+                print(f"\n✅ Status manually updated to: {new_status}\n")
             else:
-                print("⏭️ Skipped status update.\n")
+                print("\n⏭️ Skipped status update.\n")
 
             # show today's incomplete tasks
             if backlog_tasks:
@@ -423,7 +422,7 @@ while True:
         print("5. Delete Entry")
         
         while True:
-            selection = input("Field to update (1-5): ").strip()
+            selection = input("\nField to update (1-5): ").strip()
             if selection in ['1', '2', '3', '4', '5']:
                 break
             else:
@@ -479,7 +478,7 @@ while True:
                 WHERE id = %s;
             """, (new_status, app_id))
             conn.commit()
-            print("✅ Status updated.")
+            print("\n✅ Status updated.")
 
         elif selection == "2":
             contact_name = input("Contact name: ").strip()
