@@ -166,207 +166,200 @@ while True:
 
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
-                if selection in ['Y', 'N']:
+                if selection == 'Y' or selection == 'N':
+                    break
+                elif selection == 'X':
                     break
                 else:
-                    x_to_exit()
-                    break
+                    yes_or_no_selection_invalid()
+                    continue
 
             if selection == "Y":
                 print(f"\n📋 Backlog - Overdue Tasks")
                 print("-" * 60)
                 for row in backlog_rows:
                     (app_id, job_title, company, next_action,
-                    check_date, current_status, follow_up_date, interview_date,
-                    interview_time, second_interview_date, final_interview_date, is_priority) = row
+                     check_date, current_status, follow_up_date, interview_date,
+                     interview_time, second_interview_date, final_interview_date, is_priority) = row
 
                     print(f"📌 {job_title} @ {company}")
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
 
-                    if selection == "Y":
-                        print(f"\n📋 Backlog - Overdue Tasks")
-                        print("-" * 60)
-                        for row in backlog_rows:
-                            (app_id, job_title, company, next_action,
-                             check_date, current_status, follow_up_date, interview_date,
-                             interview_time, second_interview_date, final_interview_date, is_priority) = row
+                    overdue_dates = []  # show which date was overdue
+                    if check_date and check_date.date() < today:
+                        overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
+                    if follow_up_date and follow_up_date.date() < today:
+                        overdue_dates.append(f"Follow up: {follow_up_date.strftime('%B %d, %Y')}")
+                    if interview_date and interview_date.date() < today:
+                        overdue_dates.append(f"Interview: {interview_date.strftime('%B %d, %Y')}")
+                    if second_interview_date and second_interview_date.date() < today:
+                        overdue_dates.append(f"2nd Interview: {second_interview_date.strftime('%B %d, %Y')}")
+                    if final_interview_date and final_interview_date.date() < today:
+                        overdue_dates.append(f"Final Interview: {final_interview_date.strftime('%B %d, %Y')}")
 
-                            print(f"📌 {job_title} @ {company}")
-                            if next_action:
-                                print(f"   → Task: {next_action.replace('_', ' ').title()}")
+                    if overdue_dates:
+                        print(f"   → Overdue: {', '.join(overdue_dates)}")
+                    print()
+                print("-" * 60)
 
-                            overdue_dates = []  # show which date was overdue
-                            if check_date and check_date.date() < today:
-                                overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
-                            if follow_up_date and follow_up_date.date() < today:
-                                overdue_dates.append(f"Follow up: {follow_up_date.strftime('%B %d, %Y')}")
-                            if interview_date and interview_date.date() < today:
-                                overdue_dates.append(f"Interview: {interview_date.strftime('%B %d, %Y')}")
-                            if second_interview_date and second_interview_date.date() < today:
-                                overdue_dates.append(f"2nd Interview: {second_interview_date.strftime('%B %d, %Y')}")
-                            if final_interview_date and final_interview_date.date() < today:
-                                overdue_dates.append(f"Final Interview: {final_interview_date.strftime('%B %d, %Y')}")
-
-                            if overdue_dates:
-                                print(f"   → Overdue: {', '.join(overdue_dates)}")
-                            print()
-                        print("-" * 60)
-                        break
-
-        # today's current tasks
-        query = """
-            SELECT id, job_title, company, next_action,
-               check_application_status, application_status, next_follow_up_date,
-               interview_date, interview_time, second_interview_date, final_interview_date
-            FROM application_tracking
-            WHERE check_application_status::DATE = %s
-            OR next_follow_up_date::DATE = %s
-            OR interview_date::DATE = %s
-            OR second_interview_date::DATE = %s
-            OR final_interview_date::DATE = %s
-            ORDER BY job_title;
-        """
-        cursor.execute(query, (today, today, today, today, today))
-        rows = cursor.fetchall()
-
-        if not rows:
-            print("\n🎉 No tasks for today!")
+        # Exit to main menu if user pressed X
+        if selection == "X":
+            pass  # Will naturally return to main menu
         else:
-            print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
-            print("-" * 60)
+            # today's current tasks
+            query = """
+                SELECT id, job_title, company, next_action,
+                   check_application_status, application_status, next_follow_up_date,
+                   interview_date, interview_time, second_interview_date, final_interview_date
+                FROM application_tracking
+                WHERE check_application_status::DATE = %s
+                OR next_follow_up_date::DATE = %s
+                OR interview_date::DATE = %s
+                OR second_interview_date::DATE = %s
+                OR final_interview_date::DATE = %s
+                ORDER BY job_title;
+            """
+            cursor.execute(query, (today, today, today, today, today))
+            rows = cursor.fetchall()
 
-            backlog_tasks = []  # store any incomplete tasks
+            if not rows:
+                print("\n🎉 No tasks for today!")
+            else:
+                print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
+                print("-" * 60)
 
-            for row in rows:
-                (app_id, job_title, company, next_action,
-                check_date, current_status, follow_up_date, interview_date,
-                interview_time, second_interview_date, final_interview_date) = row
+                backlog_tasks = []  # store any incomplete tasks
 
-                # determine task type
-                if (interview_date == today or 
-                    second_interview_date == today or 
-                    final_interview_date == today):
-                    due_type = "Interview"
-                else:
-                    due_type = "Follow Up"
+                for row in rows:
+                    (app_id, job_title, company, next_action,
+                     check_date, current_status, follow_up_date, interview_date,
+                     interview_time, second_interview_date, final_interview_date) = row
 
-                # print tasks
-                print(f"📌 {job_title} @ {company}")
-                if next_action:
-                    print(f"   → Task: {next_action.replace('_', ' ').title()}")
+                    # determine task type
+                    if (interview_date == today or
+                            second_interview_date == today or
+                            final_interview_date == today):
+                        due_type = "Interview"
+                    else:
+                        due_type = "Follow Up"
+
+                    # print tasks
+                    print(f"📌 {job_title} @ {company}")
+                    if next_action:
+                        print(f"   → Task: {next_action.replace('_', ' ').title()}")
                     print(f"   → Type: {due_type}")
-                if interview_time:
-                    print(f"   → Interview Time: {interview_time.strftime('%I:%M %p')}")
+                    if interview_time:
+                        print(f"   → Interview Time: {interview_time.strftime('%I:%M %p')}")
                     print()
 
-                # task completion
-                while True:
-                    selection = input("\n✅ Mark this task as completed? (Y/N): ").strip().upper()
-                    if selection in ['Y', 'N']:
-                        break
+                    # task completion
+                    while True:
+                        selection = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
+                        if selection in ['Y', 'N']:
+                            break
+                        else:
+                            yes_or_no_selection_invalid()
+                            continue
+
+                    if selection == "Y":
+                        auto_status_map = {
+                            'check_application_status': 'interviewing_first_scheduled',
+                            'follow_up_with_contact': 'interviewing_first_scheduled',
+                            'send_follow_up_email': 'interviewing_first_followed_up',
+                            'prepare_for_interview': 'interviewing_first_completed',
+                            'send_thank_you_email': 'interviewing_first_followed_up',
+                            'prepare_for_second_interview': 'interviewing_second_completed',
+                            'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
+                            'prepare_for_final_interview': 'interviewing_final_completed',
+                            'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
+                        }
+
+                        if next_action and next_action in auto_status_map:
+                            new_status = auto_status_map[next_action]
+                            cursor.execute("""
+                                UPDATE application_tracking
+                                SET application_status = %s
+                                WHERE id = %s;
+                            """, (new_status, app_id))
+                            conn.commit()
+                            print(f"✅ Status auto-updated to: {new_status}\n")
+                        else:
+                            print("✅ Task marked as completed\n")
+
                     else:
-                        yes_or_no_selection_invalid()
-                        continue
+                        backlog_tasks.append((job_title, company, next_action or "Follow up"))
 
-                if selection == "Y": # automate status based on current next_action
-                    auto_status_map = {
-                        'check_application_status': 'interviewing_first_scheduled',
-                        'follow_up_with_contact': 'interviewing_first_scheduled',
-                        'send_follow_up_email': 'interviewing_first_followed_up',
-                        'prepare_for_interview': 'interviewing_first_completed',
-                        'send_thank_you_email': 'interviewing_first_followed_up',
-                        'prepare_for_second_interview': 'interviewing_second_completed',
-                        'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
-                        'prepare_for_final_interview': 'interviewing_final_completed',
-                        'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
-                    }
+                    # manual status update option
+                    while True:
+                        selection = input(
+                            "✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
+                        if selection in ['Y', 'N']:
+                            break
+                        else:
+                            letter_selection_invalid()
+                            continue
 
-                    if next_action and next_action in auto_status_map:
-                        new_status = auto_status_map[next_action]
+                    if selection == "Y":
+                        status_options = {
+                            "Applied": "applied",
+                            "First Interview Scheduled": "interviewing_first_scheduled",
+                            "First Interview Completed": "interviewing_first_completed",
+                            "Post First Interview Follow-Up Sent": "interviewing_first_followed_up",
+                            "Second Interview Scheduled": "interviewing_second_scheduled",
+                            "Second Interview Completed": "interviewing_second_completed",
+                            "Post Second Interview Follow-Up Sent": "interviewing_second_followed_up",
+                            "Final Interview Scheduled": "interviewing_final_scheduled",
+                            "Final Interview Completed": "interviewing_final_completed",
+                            "Post Final Interview Follow-Up Sent": "interviewing_final_followed_up",
+                            "Offer Received": "offer_received",
+                            "Rejected": "rejected"
+                        }
+
+                        print("\n📌 Please select the number that corresponds with the status you'd like to update to:")
+                        labels = list(status_options.keys())
+
+                        for i, label in enumerate(labels, 1):
+                            print(f"{i}. {label}")
+
+                        while True:
+                            selection = input("Enter the number or status name: ").strip()
+                            new_status = None
+
+                            if selection.isdigit():
+                                index = int(selection) - 1
+                                if 0 <= index < len(labels):
+                                    new_status = status_options[labels[index]]
+                                    break
+                                else:
+                                    number_selection_invalid()
+                                    continue
+                            else:
+                                lower_map = {k.lower(): v for k, v in status_options.items()}
+                                if selection.lower() in lower_map:
+                                    new_status = lower_map[selection.lower()]
+                                    break
+                                else:
+                                    number_selection_invalid()
+                                    continue
+
                         cursor.execute("""
                             UPDATE application_tracking
                             SET application_status = %s
                             WHERE id = %s;
                         """, (new_status, app_id))
                         conn.commit()
-                        print(f"\n✅ Status auto-updated to: {new_status}\n")
+                        print(f"✅ Status manually updated to: {new_status}\n")
                     else:
-                        print("\n✅ Task marked as completed\n")
+                        print("⏭️ Skipped status update.\n")
 
-                else: # add the task to backlog if not completed
-                    backlog_tasks.append((job_title, company, next_action or "Follow up"))
-
-                # manual status update option
-                while True:
-                    selection = input("✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
-                    if selection in ['Y', 'N']:
-                        break
-                    else:
-                        letter_selection_invalid()
-                        continue
-
-                # manual display of all options to update
-                if selection == "Y":
-                   status_options = {
-                       "Applied": "applied",
-                       "First Interview Scheduled": "interviewing_first_scheduled",
-                       "First Interview Completed": "interviewing_first_completed",
-                       "Post First Interview Follow-Up Sent": "interviewing_first_followed_up",
-                       "Second Interview Scheduled": "interviewing_second_scheduled",
-                       "Second Interview Completed": "interviewing_second_completed",
-                       "Post Second Interview Follow-Up Sent": "interviewing_second_followed_up",
-                       "Final Interview Scheduled": "interviewing_final_scheduled",
-                       "Final Interview Completed": "interviewing_final_completed",
-                       "Post Final Interview Follow-Up Sent": "interviewing_final_followed_up",
-                       "Offer Received": "offer_received",
-                       "Rejected": "rejected"
-                   }
-
-                   print("\n📌 Please select the number that corresponds with the status you'd like to update to:")
-                   labels = list(status_options.keys())
-                   
-                   for i, label in enumerate(labels, 1):
-                       print(f"{i}. {label}")
-
-                while True:
-                    selection = input("Enter the number or status name: ").strip()
-                    new_status = None
-
-                    if selection.isdigit():
-                        index = int(selection) - 1
-                        if 0 <= index < len(labels):
-                            new_status = status_options[labels[index]]
-                            break
-                        else:
-                            number_selection_invalid()
-                            continue
-                    else:
-                        lower_map = {k.lower(): v for k, v in status_options.items()}
-                        if selection.lower() in lower_map:
-                            new_status = lower_map[selection.lower()]
-                            break
-                        else:
-                            number_selection_invalid()
-                            continue
-
-                cursor.execute("""
-                    UPDATE application_tracking
-                    SET application_status = %s
-                    WHERE id = %s;
-                """, (new_status, app_id))
-                conn.commit()
-                print(f"\n✅ Status manually updated to: {new_status}\n")
-            else:
-                print("\n⏭️ Skipped status update.\n")
-
-            # show today's incomplete tasks
-            if backlog_tasks:
-                print("\n📋 Today's Incomplete Tasks:")
-                print("-" * 60)
-                for job_title, company, task in backlog_tasks:
-                    print(f"📌 {job_title} @ {company} - {task}")
-                print("-" * 60)
+                # show today's incomplete tasks
+                if backlog_tasks:
+                    print("\n📋 Today's Incomplete Tasks:")
+                    print("-" * 60)
+                    for job_title, company, task in backlog_tasks:
+                        print(f"📌 {job_title} @ {company} - {task}")
+                    print("-" * 60)
 
 
     # ENTER: individual application entry
