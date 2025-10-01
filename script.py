@@ -166,10 +166,14 @@ while True:
 
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
-                # Exit to main menu if user pressed X
-                if selection == "X":
-                    pass  # Will naturally return to main menu
-                    
+                if selection == 'Y' or selection == 'N':
+                    break
+                elif selection == 'X':
+                    break
+                else:
+                    yes_or_no_selection_invalid()
+                    continue
+
             if selection == "Y":
                 print(f"\n📋 Backlog - Overdue Tasks")
                 print("-" * 60)
