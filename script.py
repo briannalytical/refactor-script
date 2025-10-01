@@ -23,7 +23,6 @@ def show_intro():
     print("You can press X + enter at any point to return to the main menu!")
 
 #TODO: x to exit at every point
-
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -35,6 +34,7 @@ def show_main_menu():
     
 show_intro()
 
+# invalid entry handling
 def number_selection_invalid():
     print("\n😭 Invalid number selection. Please select from available options.")
 
@@ -57,10 +57,10 @@ while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
 
-    #TODO: then print details
-    #TODO: add priority detail print text
-    #TODO: remove "is priority false"
-    #TODO: check_application_status clean up text
+#TODO: then print details
+#TODO: add priority detail print text
+#TODO: remove "is priority false"
+#TODO: check_application_status clean up text
     if selection == "VIEW":
         while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
@@ -77,7 +77,8 @@ while True:
             else:
                 letter_selection_invalid()
                 continue
-    #TODO: Print job ids correctly
+
+#TODO: Print job ids correctly
         if selection != "X":
             cursor.execute(query)
             rows = cursor.fetchall()
@@ -141,10 +142,10 @@ while True:
                         number_selection_invalid()
 
 
-    #TODO: display and order by priority then date applied
-    #TODO: automation for follow-up post interview
-    #TODO: prompt completion of task for backlog (function)
-    #TODO: show contact info details; message for if this is blank
+#TODO: display and order by priority then date applied
+#TODO: automation for follow-up post interview
+#TODO: prompt completion of task for backlog (function)
+#TODO: show contact info details; message for if this is blank
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         # begin backlog tasks
