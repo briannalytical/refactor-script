@@ -20,9 +20,11 @@ def show_intro():
     print("\n📋 Hello! Welcome to Refactor, your job application tracker! I hope you will find this tool useful! 🥰")
     print("It's tough out there, but tracking your applications doesn't have to be!")
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
+    print("You can press X + enter at any point to return to the main menu!")
 
 #TODO: x to exit at every point
-#TODO: 
+#TODO: add \n for spacing
+#TODO: main menu loops twice
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -50,23 +52,23 @@ def deletion_cancelled():
     print("❌ Deletion has been cancelled.")
 
 def x_to_exit():
+    print("\n🔙 Returning to main menu.")
     show_main_menu()
 
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
 
-
     #TODO: then print details
-    #TODO: add priority print text
+    #TODO: add priority detail print text
+    #TODO: remove "is priority false"
     #TODO: check_application_status clean up text
-    # VIEW: view applications
     if selection == "VIEW":
         while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' date_applied DESC, company ASC" 
+                query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' ORDER BY date_applied DESC, company ASC"
                 break
             elif selection == "N":
                 query = "SELECT * FROM application_tracking ORDER BY date_applied DESC, company ASC"
@@ -95,9 +97,9 @@ while True:
 
                 # select application id
                 while True:
-                    selection = input("\nEnter application ID to view details, or press E to exit: ").strip().upper()
+                    selection = input("\nEnter application ID to view details, or press X to exit: ").strip().upper()
                     if selection == "E":
-                        e_to_exit()
+                        x_to_exit()
                         break
     
                     try:
