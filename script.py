@@ -22,8 +22,8 @@ def show_intro():
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
     print("You can press X + enter at any point to return to the main menu!")
 
-    #TODO: x to exit at every point
-    #TODO: add \n for spacing throughout
+#TODO: x to exit at every point
+
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -141,12 +141,13 @@ while True:
                         number_selection_invalid()
 
 
-    #TODO: display and order by priority
+    #TODO: display and order by priority then date applied
     #TODO: automation for follow-up post interview
     #TODO: prompt completion of task for backlog (function)
+    #TODO: show contact info details; message for if this is blank
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
-        # backlog tasks
+        # begin backlog tasks
         backlog_query = """
             SELECT id, job_title, company, next_action,
                check_application_status, application_status, next_follow_up_date,
@@ -205,6 +206,7 @@ while True:
                     print()
                 print("-" * 60)
 
+        # begin daily task board
         if selection == "N":
             query = """
                 SELECT id, job_title, company, next_action,
@@ -281,9 +283,9 @@ while True:
                                 WHERE id = %s;
                             """, (new_status, app_id))
                             conn.commit()
-                            print(f"✅ Status auto-updated to: {new_status}\n")
+                            print(f"\n✅ Status auto-updated to: {new_status}\n")
                         else:
-                            print("✅ Task marked as completed\n")
+                            print("\n✅ Task marked as completed")
 
                     else:
                         backlog_tasks.append((job_title, company, next_action or "Follow up"))
@@ -291,7 +293,7 @@ while True:
                     # manual status update option
                     while True:
                         selection = input(
-                            "✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
+                            "\n✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
                         if selection in ['Y', 'N']:
                             break
                         else:
@@ -347,9 +349,9 @@ while True:
                             WHERE id = %s;
                         """, (new_status, app_id))
                         conn.commit()
-                        print(f"✅ Status manually updated to: {new_status}\n")
+                        print(f"\n✅ Status manually updated to: {new_status}\n")
                     else:
-                        print("⏭️ Skipped status update.\n")
+                        print("\n⏭️ Skipped status update.\n")
 
                 # show today's incomplete tasks
                 if backlog_tasks:
@@ -419,6 +421,7 @@ while True:
             except ValueError:
                 number_selection_invalid()
 
+#TODO: notes should append to existing notes instead of default replace
         print("\nWhat do you want to update?")
         print("1. Application status")
         print("2. Update contact info")
@@ -497,7 +500,7 @@ while True:
                 WHERE id = %s;
             """, (contact_name, contact_details, app_id))
             conn.commit()
-            print("✅ Follow-up contact updated.")
+            print("\n✅ Follow-up contact updated.")
 
         elif selection == "3":
             interview_date = input("Enter interview date (YYYY-MM-DD): ").strip()
@@ -514,7 +517,7 @@ while True:
                 WHERE id = %s;
             """, (interview_date, interview_time or None, interview_name, prep_notes or None, app_id))
             conn.commit()
-            print("✅ Interview details updated.")
+            print("\n✅ Interview details updated.")
 
         elif selection == "4":
             new_notes = input("Enter your updated job notes: ").strip()
@@ -524,7 +527,7 @@ while True:
                 WHERE id = %s;
             """, (new_notes, app_id))
             conn.commit()
-            print("✅ Notes updated.")
+            print("\n✅ Notes updated.")
         
         elif selection == "5":
             cursor.execute("""
@@ -553,21 +556,21 @@ while True:
                         if selection == "DELETE":
                             break
                         elif selection.upper() == "N" or selection.upper() == "NO":
-                            print("❌ Deletion cancelled.")
+                            print("\n❌ Deletion cancelled.")
                             break
                         else:
-                            print("❌ Please type 'DELETE' exactly to confirm, or 'N' to cancel")
+                            print("\n❌ Please type 'DELETE' exactly to confirm, or 'N' to cancel")
             
                     if selection == "DELETE":
                         cursor.execute("DELETE FROM application_tracking WHERE id = %s;", (app_id,))
                         conn.commit()
-                        print(f"✅ Application for {job_title} @ {company} has been deleted.")
+                        print(f"\n✅ Application for {job_title} @ {company} has been deleted.")
                     else:
                         deletion_cancelled()
                 else:
                     deletion_cancelled()
             else:
-                print("❌ Application not found.")
+                print("\n❌ Application not found.")
 
 
     # TIPS: tips for job seekers
@@ -579,11 +582,11 @@ while True:
         print("💻 Keep applying, keep trying. It will not be this way forever.")
 
     elif selection == "BYE":
-        print("👋 Goodbye! Check back again soon!")
+        print("\n👋 Goodbye! Check back again soon!")
         break
     
     else:
-        print("❌ Invalid selection. 🥲 Please try again from the main menu.")
+        print("\n❌ Invalid selection. 🥲 Please try again from the main menu.")
 
 # cleanup
 cursor.close()
