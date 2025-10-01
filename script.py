@@ -143,6 +143,7 @@ while True:
 
     #TODO: display and order by priority
     #TODO: automation for follow-up post interview
+    #TODO: prompt completion of task for backlog (function)
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         # backlog tasks
@@ -204,11 +205,7 @@ while True:
                     print()
                 print("-" * 60)
 
-        # exit to main menu
-        if selection == "X":
-            pass
-        # today's current tasks
-        else:
+        if selection == "N":
             query = """
                 SELECT id, job_title, company, next_action,
                    check_application_status, application_status, next_follow_up_date,
@@ -399,8 +396,8 @@ while True:
 
 
     # UPDATE: make updates to existing applications
-    #TODO: make update for priority
-    #TODO: handle invalid selection
+#TODO: make update for priority
+#TODO: handle invalid selection
     elif selection == "UPDATE":
         cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY company;")
         apps = cursor.fetchall()
@@ -437,6 +434,7 @@ while True:
                 number_selection_invalid()
                 continue
 
+#TODO: show selected application when menu option comes up.
         if selection == "1":
             status_options = {
                 "Applied": "applied",
@@ -453,6 +451,7 @@ while True:
                 "Rejected": "rejected"
             }
 
+#TODO: prompt date and time entry for interviews
             print("\n📌 Select a new status:")
             labels = list(status_options.keys())
             
