@@ -156,8 +156,8 @@ while True:
             OR (interview_date::DATE < %s AND interview_date IS NOT NULL)
             OR (second_interview_date::DATE < %s AND second_interview_date IS NOT NULL)
             OR (final_interview_date::DATE < %s AND final_interview_date IS NOT NULL)
-            ORDER BY job_title;
-        """
+            ORDER BY next_follow_up_date ASC;
+            """
         cursor.execute(backlog_query, (today, today, today, today, today))
         backlog_rows = cursor.fetchall()
 
@@ -166,14 +166,10 @@ while True:
 
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
-                if selection == 'Y' or selection == 'N':
-                    break
-                elif selection == 'X':
-                    break
-                else:
-                    yes_or_no_selection_invalid()
-                    continue
-
+                # Exit to main menu if user pressed X
+                if selection == "X":
+                    pass  # Will naturally return to main menu
+                    
             if selection == "Y":
                 print(f"\n📋 Backlog - Overdue Tasks")
                 print("-" * 60)
