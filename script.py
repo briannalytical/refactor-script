@@ -145,6 +145,7 @@ while True:
     #TODO: automation for follow-up post interview
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
+        # backlog tasks
         backlog_query = """
             SELECT id, job_title, company, next_action,
                check_application_status, application_status, next_follow_up_date,
@@ -160,7 +161,7 @@ while True:
         cursor.execute(backlog_query, (today, today, today, today, today))
         backlog_rows = cursor.fetchall()
 
-        if backlog_rows: #show backlog if exists
+        if backlog_rows:
             print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
 
             while True:
@@ -182,23 +183,36 @@ while True:
                     print(f"📌 {job_title} @ {company}")
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
-                    
-                    overdue_dates = [] # show which date was overdue
-                    if check_date and check_date < today:
-                        overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
-                    if follow_up_date and follow_up_date < today:
-                        overdue_dates.append(f"Follow up: {follow_up_date.strftime('%B %d, %Y')}")
-                    if interview_date and interview_date < today:
-                        overdue_dates.append(f"Interview: {interview_date.strftime('%B %d, %Y')}")
-                    if second_interview_date and second_interview_date < today:
-                        overdue_dates.append(f"2nd Interview: {second_interview_date.strftime('%B %d, %Y')}")
-                    if final_interview_date and final_interview_date < today:
-                        overdue_dates.append(f"Final Interview: {final_interview_date.strftime('%B %d, %Y')}")
-                    
-                    if overdue_dates:
-                        print(f"   → Overdue: {', '.join(overdue_dates)}")
-                    print()
-                print("-" * 60)
+
+                    if selection == "Y":
+                        print(f"\n📋 Backlog - Overdue Tasks")
+                        print("-" * 60)
+                        for row in backlog_rows:
+                            (app_id, job_title, company, next_action,
+                             check_date, current_status, follow_up_date, interview_date,
+                             interview_time, second_interview_date, final_interview_date, is_priority) = row
+
+                            print(f"📌 {job_title} @ {company}")
+                            if next_action:
+                                print(f"   → Task: {next_action.replace('_', ' ').title()}")
+
+                            overdue_dates = []  # show which date was overdue
+                            if check_date and check_date.date() < today:
+                                overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
+                            if follow_up_date and follow_up_date.date() < today:
+                                overdue_dates.append(f"Follow up: {follow_up_date.strftime('%B %d, %Y')}")
+                            if interview_date and interview_date.date() < today:
+                                overdue_dates.append(f"Interview: {interview_date.strftime('%B %d, %Y')}")
+                            if second_interview_date and second_interview_date.date() < today:
+                                overdue_dates.append(f"2nd Interview: {second_interview_date.strftime('%B %d, %Y')}")
+                            if final_interview_date and final_interview_date.date() < today:
+                                overdue_dates.append(f"Final Interview: {final_interview_date.strftime('%B %d, %Y')}")
+
+                            if overdue_dates:
+                                print(f"   → Overdue: {', '.join(overdue_dates)}")
+                            print()
+                        print("-" * 60)
+                        break
 
         # today's current tasks
         query = """
