@@ -21,7 +21,8 @@ def show_intro():
     print("It's tough out there, but tracking your applications doesn't have to be!")
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
 
-#TODO: e to exit at every point
+#TODO: x to exit at every point
+#TODO: 
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -43,12 +44,12 @@ def yes_or_no_selection_invalid():
     print("😭 Please select Y or N.")
 
 def yes_no_exit_selection_invalid():
-    print("Girl just pick yes, no, or exit. 😭")
+    print("Girl just pick yes, no, or eXit. 😭")
 
 def deletion_cancelled():
     print("❌ Deletion has been cancelled.")
 
-def e_to_exit():
+def x_to_exit():
     show_main_menu()
 
 while True:
@@ -62,7 +63,7 @@ while True:
     # VIEW: view applications
     if selection == "VIEW":
         while True:
-            selection = input("\nDo you want to see only active applications? (Y/N) Press E to exit: ").strip().upper()
+            selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
                 query = "SELECT * FROM application_tracking WHERE application_status != 'rejected' date_applied DESC, company ASC" 
@@ -70,13 +71,13 @@ while True:
             elif selection == "N":
                 query = "SELECT * FROM application_tracking ORDER BY date_applied DESC, company ASC"
                 break
-            elif selection == "E":
+            elif selection == "X":
                 break
             else:
                 letter_selection_invalid()
                 continue
 
-        if selection != "E":
+        if selection != "X":
             cursor.execute(query)
             rows = cursor.fetchall()
             column_names = [desc[0] for desc in cursor.description]
