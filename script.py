@@ -157,18 +157,19 @@ while True:
             OR (second_interview_date::DATE < %s AND second_interview_date IS NOT NULL)
             OR (final_interview_date::DATE < %s AND final_interview_date IS NOT NULL)
             ORDER BY next_follow_up_date ASC;
-            """
+        """
         cursor.execute(backlog_query, (today, today, today, today, today))
         backlog_rows = cursor.fetchall()
+
+        # set default for bypassing backlog
+        selection = "N"
 
         if backlog_rows:
             print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
 
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
-                if selection == 'Y' or selection == 'N':
-                    break
-                elif selection == 'X':
+                if selection in ['Y', 'N', 'X']:
                     break
                 else:
                     yes_or_no_selection_invalid()
@@ -186,7 +187,7 @@ while True:
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
 
-                    overdue_dates = []  # show which date was overdue
+                    overdue_dates = []
                     if check_date and check_date.date() < today:
                         overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
                     if follow_up_date and follow_up_date.date() < today:
@@ -203,11 +204,11 @@ while True:
                     print()
                 print("-" * 60)
 
-        # Exit to main menu if user pressed X
+        # exit to main menu
         if selection == "X":
-            pass  # Will naturally return to main menu
+            pass
+        # today's current tasks
         else:
-            # today's current tasks
             query = """
                 SELECT id, job_title, company, next_action,
                    check_application_status, application_status, next_follow_up_date,
