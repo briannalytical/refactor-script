@@ -22,7 +22,6 @@ def show_intro():
     print("You can use this tool to track applications, remind you when to follow up, and schedule your interviews!")
     print("You can press X + enter at any point to return to the main menu!")
 
-#TODO: x to exit at every point
 def show_main_menu():
     print("\nWhat would you like to do? Enter your choice below:")
     print("\nVIEW: View all applications")
@@ -172,7 +171,10 @@ while True:
 
             while True:
                 selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
-                if selection in ['Y', 'N', 'X']:
+                if selection == "X":
+                    x_to_exit()
+                    break
+                elif selection in ['Y', 'N']:
                     break
                 else:
                     yes_or_no_selection_invalid()
@@ -257,7 +259,10 @@ while True:
                     # task completion
                     while True:
                         selection = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
-                        if selection in ['Y', 'N']:
+                        if selection == "X":
+                            x_to_exit()
+                            break
+                        elif selection in ['Y', 'N']:
                             break
                         else:
                             yes_or_no_selection_invalid()
@@ -295,7 +300,10 @@ while True:
                     while True:
                         selection = input(
                             "\n✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
-                        if selection in ['Y', 'N']:
+                        if selection == "X":
+                            x_to_exit()
+                            break
+                        elif selection in ['Y', 'N']:
                             break
                         else:
                             letter_selection_invalid()
@@ -327,7 +335,10 @@ while True:
                             selection = input("Enter the number or status name: ").strip()
                             new_status = None
 
-                            if selection.isdigit():
+                            if selection == "X":
+                                x_to_exit()
+                                break
+                            elif selection.isdigit():
                                 index = int(selection) - 1
                                 if 0 <= index < len(labels):
                                     new_status = status_options[labels[index]]
@@ -381,7 +392,6 @@ while True:
             else:
                 yes_or_no_selection_invalid()
                 continue
-    
         print("Optional now, but do your research! 🔎")
         contact_name = input("Contact Name: ").strip()
         contact_details = input("Contact Details: ").strip()
@@ -416,11 +426,12 @@ while True:
         while True:
             try:
                 app_id = int(input("\nEnter the number of the application to update: "))
-                # Verify the ID exists
+                # verify the id exists
                 if any(app[0] == app_id for app in apps):
                     break
             except ValueError:
                 number_selection_invalid()
+
 
 #TODO: notes should append to existing notes instead of default replace
         print("\nWhat do you want to update?")
@@ -432,7 +443,10 @@ while True:
         
         while True:
             selection = input("\nField to update (1-5): ").strip()
-            if selection in ['1', '2', '3', '4', '5']:
+            if selection == "X":
+                x_to_exit()
+                break
+            elif selection in ['1', '2', '3', '4', '5']:
                 break
             else:
                 number_selection_invalid()
@@ -465,8 +479,10 @@ while True:
             while True:
                 selection = input("Enter the number or status name: ").strip()
                 new_status = None
-
-                if selection.isdigit():
+                if selection == "X":
+                    x_to_exit()
+                    break
+                elif selection.isdigit():
                     index = int(selection) - 1
                     if 0 <= index < len(labels):
                         new_status = status_options[labels[index]]
@@ -547,9 +563,13 @@ while True:
                 
                 while True:
                     selection = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
-                    if selection in ['Y', 'N']:
+                    if selection == "X":
+                        x_to_exit()
                         break
-                    yes_or_no_selection_invalid()
+                    elif selection in ['Y', 'N']:
+                        break
+                    else:
+                        yes_or_no_selection_invalid()
         
                 if selection == "Y":
                     while True:
