@@ -56,7 +56,7 @@ while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
 
-#TODO: then print details
+#TODO: then print ALL details
 #TODO: add priority detail print text
 #TODO: remove "is priority false"
 #TODO: check_application_status clean up text
@@ -426,8 +426,11 @@ while True:
         while True:
             try:
                 app_id = int(input("\nEnter the number of the application to update: "))
+                if selection == "X":
+                    x_to_exit()
+                    break
                 # verify the id exists
-                if any(app[0] == app_id for app in apps):
+                elif any(app[0] == app_id for app in apps):
                     break
             except ValueError:
                 number_selection_invalid()
