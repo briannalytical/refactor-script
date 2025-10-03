@@ -52,6 +52,23 @@ def deletion_cancelled():
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
+def format_status(status):
+    status_map = {
+        'applied': 'Applied',
+        'interviewing_first_scheduled': 'First Interview Scheduled',
+        'interviewing_first_completed': 'First Interview Completed',
+        'interviewing_first_followed_up': 'First Interview Completed - Follow-up Sent',
+        'interviewing_second_scheduled': 'Second Interview Scheduled',
+        'interviewing_second_completed': 'Second Interview Completed',
+        'interviewing_second_followed_up': 'Second Interview Completed - Follow-up Sent',
+        'interviewing_final_scheduled': 'Final Interview Scheduled',
+        'interviewing_final_completed': 'Final Interview Completed',
+        'interviewing_final_followed_up': 'Final Interview Completed - Follow-up Sent',
+        'offer_received': 'Offer Received',
+        'rejected': 'Rejected'
+    }
+    return status_map.get(status, status.replace('_', ' ').title())
+
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
@@ -65,10 +82,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT company, job_title, id FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "N":
-                query = "SELECT company, job_title, id FROM application_tracking ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status FROM application_tracking ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "X":
                 x_to_exit()
@@ -88,57 +105,59 @@ while True:
             else:
                 print("\n📄 Applications")
                 print("=" * 60)
+
                 # display all applications
-                for row in rows:
-                    company, job_title, app_id = row[0], row[1], row[2]
-                    print(f"{company}: {job_title} ({app_id})")
-                    print("=" * 60)
+            for row in rows:
+                company, job_title, app_id, application_status = row[0], row[1], row[2], row[3]
+                print(f"{company}: {job_title} ({app_id})")
+                print(f"   Status: {application_status.replace('_', ' ').title()}")
+                print("=" * 60)
 
-                # select application id
-                while True:
-                    selection = input("\nEnter application ID to view details, or press X to exit: ").strip().upper()
-                    if selection == "X":
-                        x_to_exit()
-                        break
-    
-                    try:
-                        selected_id = int(selection)
-                        # find selected application
-                        selected_row = None
-                        for row in rows:
-                            if row[2] == selected_id:
-                                selected_row = row
-                                break
-        
-                        # display application details
-                        if selected_row:
-                            print(f"\n📄 Application Details: {selected_id}")
-                            print("=" * 60)
+            # select application id
+            while True:
+                selection = input("\nEnter application ID to view details, or press X to exit: ").strip().upper()
+                if selection == "X":
+                    x_to_exit()
+                    break
 
-                            # display all fields for selected application
-                            display_fields = [
-                                (col, val) for col, val in zip(column_names, selected_row)
-                                if col != "id" and val not in (None, '')
-                                ]
+                try:
+                    selected_id = int(selection)
+                    # find selected application
+                    selected_row = None
+                    for row in rows:
+                        if row[2] == selected_id:
+                            selected_row = row
+                            break
 
-                            if display_fields:
-                                for col, val in display_fields:
-                                    # date and time formatting
-                                    if isinstance(val, datetime.date):
-                                        val = val.strftime("%B %d, %Y")
-                                    elif isinstance(val, datetime.time):
-                                        val = val.strftime("%I:%M %p")
+                    # display application details
+                    if selected_row:
+                        print(f"\n📄 Application Details: {selected_id}")
+                        print("=" * 60)
 
-                                    # column name formatting
-                                    col_clean = col.replace('_', ' ').title()
-                                    print(f"{col_clean}: {val}")
+                        # display all fields for selected application
+                        display_fields = [
+                            (col, val) for col, val in zip(column_names, selected_row)
+                            if col != "id" and val not in (None, '')
+                        ]
 
-                                    print("-" * 60)
-                        else:
-                            number_selection_invalid()
-            
-                    except ValueError:
+                        if display_fields:
+                            for col, val in display_fields:
+                                # date and time formatting
+                                if isinstance(val, datetime.date):
+                                    val = val.strftime("%B %d, %Y")
+                                elif isinstance(val, datetime.time):
+                                    val = val.strftime("%I:%M %p")
+
+                                # column name formatting
+                                col_clean = col.replace('_', ' ').title()
+                                print(f"{col_clean}: {val}")
+
+                            print("-" * 60)
+                    else:
                         number_selection_invalid()
+
+                except ValueError:
+                    number_selection_invalid()
 
 
 #TODO: display and order by priority then date applied
