@@ -109,12 +109,12 @@ while True:
                 print("\n📄 Applications")
                 print("=" * 60)
 
-                # display all applications
+            # display applications formatting
             for row in rows:
                 company, job_title, app_id, application_status = row[0], row[1], row[2], row[3]
                 print(f"{company}: {job_title} ({app_id})")
                 print(f"   Status: {format_status(application_status)}")
-                priority_indicator = "‼️ " if is_priority else ""
+                priority_indicator = "‼️Priority" if is_priority else ""
                 print(f"{priority_indicator}{company}: {job_title} ({app_id})")
                 print("=" * 60)
 
@@ -146,7 +146,7 @@ while True:
 
                         if display_fields:
                             for col, val in display_fields:
-                                # date and time formatting
+                                # date and time display formatting
                                 if isinstance(val, datetime.date):
                                     val = val.strftime("%B %d, %Y")
                                 elif isinstance(val, datetime.time):
