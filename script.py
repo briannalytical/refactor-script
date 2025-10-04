@@ -53,7 +53,7 @@ def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
 def format_status(status):
-    status_map = {
+    status_map_formatting = {
         'applied': 'Applied',
         'interviewing_first_scheduled': 'First Interview Scheduled',
         'interviewing_first_completed': 'First Interview Completed',
@@ -67,16 +67,14 @@ def format_status(status):
         'offer_received': 'Offer Received',
         'rejected': 'Rejected'
     }
-    return status_map.get(status, status.replace('_', ' ').title())
+    return status_map_formatting.get(status, status.replace('_', ' ').title())
 
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
 
-#TODO: then print ALL details
 #TODO: add priority detail print text
 #TODO: remove "is priority false"
-#TODO: check_application_status clean up text
     if selection == "VIEW":
         while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
@@ -283,7 +281,7 @@ while True:
 
                     # task completion
                     while True:
-                        selection = input("✅ Mark this task as completed? (Y/N): ").strip().upper()
+                        selection = input("\n✅ Mark this task as completed? (Y/N): ").strip().upper()
                         if selection == "X":
                             x_to_exit()
                             break
@@ -321,6 +319,7 @@ while True:
                     else:
                         backlog_tasks.append((job_title, company, next_action or "Follow up"))
 
+#TODO: implement status method
                     # manual status update option
                     while True:
                         selection = input(
@@ -357,7 +356,7 @@ while True:
                             print(f"{i}. {label}")
 
                         while True:
-                            selection = input("Enter the number or status name: ").strip()
+                            selection = input("Enter the number: ").strip()
                             new_status = None
 
                             if selection == "X":
