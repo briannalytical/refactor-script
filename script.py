@@ -86,10 +86,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking WHERE application_status != 'rejected' ORDER BY is_priority DESC, company ASC, date_applied ASC"
                 break
             elif selection == "N":
-                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking ORDER BY is_priority DESC, company ASC, date_applied ASC"
                 break
             elif selection == "X":
                 x_to_exit()
