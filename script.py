@@ -94,7 +94,6 @@ while True:
                 letter_selection_invalid()
                 continue
 
-#TODO: Print job ids correctly
         if selection != "X":
             cursor.execute(query)
             rows = cursor.fetchall()
@@ -110,7 +109,7 @@ while True:
             for row in rows:
                 company, job_title, app_id, application_status = row[0], row[1], row[2], row[3]
                 print(f"{company}: {job_title} ({app_id})")
-                print(f"   Status: {application_status.replace('_', ' ').title()}")
+                print(f"   Status: {format_status(application_status)}")
                 print("=" * 60)
 
             # select application id
@@ -147,6 +146,10 @@ while True:
                                     val = val.strftime("%B %d, %Y")
                                 elif isinstance(val, datetime.time):
                                     val = val.strftime("%I:%M %p")
+
+                                # format application status specially
+                                if col == "application_status":
+                                    val = format_status(val)
 
                                 # column name formatting
                                 col_clean = col.replace('_', ' ').title()
