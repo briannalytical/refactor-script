@@ -52,6 +52,7 @@ def deletion_cancelled():
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
+# formatting
 def format_status(status):
     status_map_formatting = {
         'applied': 'Applied',
@@ -82,12 +83,12 @@ def format_datetime(val):
         return val.strftime("%I:%M %p")
     return val
 
+########################
+
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
 
-#TODO: add priority detail print text
-#TODO: remove "is priority false"
     if selection == "VIEW":
         while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
