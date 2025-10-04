@@ -114,6 +114,8 @@ while True:
                 company, job_title, app_id, application_status = row[0], row[1], row[2], row[3]
                 print(f"{company}: {job_title} ({app_id})")
                 print(f"   Status: {format_status(application_status)}")
+                priority_indicator = "‼️ " if is_priority else ""
+                print(f"{priority_indicator}{company}: {job_title} ({app_id})")
                 print("=" * 60)
 
             # select application id
@@ -132,12 +134,11 @@ while True:
                             selected_row = row
                             break
 
-                    # display application details
                     if selected_row:
                         print(f"\n📄 Application Details: {selected_id}")
                         print("=" * 60)
 
-                        # display all fields for selected application
+                        # display all fields for selected application and none if they are null
                         display_fields = [
                             (col, val) for col, val in zip(column_names, selected_row)
                             if col != "id" and val not in (None, '')
@@ -151,12 +152,15 @@ while True:
                                 elif isinstance(val, datetime.time):
                                     val = val.strftime("%I:%M %p")
 
-                                # format application status specially
+                                # display formatting
                                 if col == "application_status":
                                     val = format_status(val)
                                 if col == "follow_up_contact_name":
                                     val == format_status(val)
-
+                                elif col == "is_priority":
+                                    val = priority_formatting(val)
+                                    if not val:
+                                        continue
 
                                 # column name formatting
                                 col_clean = col.replace('_', ' ').title()
