@@ -82,10 +82,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT company, job_title, id, application_status FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "N":
-                query = "SELECT company, job_title, id, application_status FROM application_tracking ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details FROM application_tracking ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "X":
                 x_to_exit()
@@ -150,6 +150,9 @@ while True:
                                 # format application status specially
                                 if col == "application_status":
                                     val = format_status(val)
+                                if col == "follow_up_contact_name":
+                                    val == format_status(val)
+
 
                                 # column name formatting
                                 col_clean = col.replace('_', ' ').title()
