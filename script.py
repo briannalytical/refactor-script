@@ -69,11 +69,11 @@ def format_status(status):
     }
     return status_map_formatting.get(status, status.replace('_', ' ').title())
 
-def priority_formatting(is_priority):
-        if is_priority:
-            return "‼️Priority"
-        else:
-            return ""
+def format_priority(is_priority):
+    if is_priority is True:  # null check
+        return "‼️ Priority"
+    else:
+        return ""
 
 while True:
     show_main_menu()
@@ -111,11 +111,11 @@ while True:
 
             # display applications formatting
             for row in rows:
-                company, job_title, app_id, application_status = row[0], row[1], row[2], row[3]
-                print(f"{company}: {job_title} ({app_id})")
-                print(f"   Status: {format_status(application_status)}")
-                priority_indicator = "‼️Priority" if is_priority else ""
+                company, job_title, app_id, application_status, date_applied, contact_name, contact_details, is_priority = \
+                row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+                priority_indicator = "‼️ " if is_priority is True else ""
                 print(f"{priority_indicator}{company}: {job_title} ({app_id})")
+                print(f"   Status: {format_status(application_status)}")
                 print("=" * 60)
 
             # select application id
@@ -155,10 +155,8 @@ while True:
                                 # display formatting
                                 if col == "application_status":
                                     val = format_status(val)
-                                if col == "follow_up_contact_name":
-                                    val == format_status(val)
                                 elif col == "is_priority":
-                                    val = priority_formatting(val)
+                                    val = format_priority(val)
                                     if not val:
                                         continue
 
