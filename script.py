@@ -460,6 +460,7 @@ while True:
             except ValueError:
                 number_selection_invalid()
 
+        print(f"\n{app_id}: {app[2]} - {app[1]}")
 
 #TODO: notes should append to existing notes instead of default replace
         print("\nWhat do you want to update?")
