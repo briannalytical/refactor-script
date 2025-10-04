@@ -75,6 +75,13 @@ def format_priority(is_priority):
     else:
         return ""
 
+def format_datetime(val):
+    if isinstance(val, datetime.date):
+        return val.strftime("%B %d, %Y")
+    elif isinstance(val, datetime.time):
+        return val.strftime("%I:%M %p")
+    return val
+
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
@@ -116,6 +123,7 @@ while True:
                 priority_indicator = "‼️ " if is_priority is True else ""
                 print(f"{priority_indicator}{company}: {job_title} ({app_id})")
                 print(f"   Status: {format_status(application_status)}")
+                print(f"   Date Applied: {format_datetime(date_applied)}")
                 print("=" * 60)
 
             # select application id
@@ -146,11 +154,8 @@ while True:
 
                         if display_fields:
                             for col, val in display_fields:
-                                # date and time display formatting
-                                if isinstance(val, datetime.date):
-                                    val = val.strftime("%B %d, %Y")
-                                elif isinstance(val, datetime.time):
-                                    val = val.strftime("%I:%M %p")
+                                # date and time formatting
+                                val = format_datetime(val)
 
                                 # display formatting
                                 if col == "application_status":
@@ -159,6 +164,10 @@ while True:
                                     val = format_priority(val)
                                     if not val:
                                         continue
+
+                                # column name formatting
+                                col_clean = col.replace('_', ' ').title()
+                                print(f"{col_clean}: {val}")
 
                                 # column name formatting
                                 col_clean = col.replace('_', ' ').title()
