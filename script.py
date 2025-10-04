@@ -69,6 +69,12 @@ def format_status(status):
     }
     return status_map_formatting.get(status, status.replace('_', ' ').title())
 
+def priority_formatting(is_priority):
+        if is_priority:
+            return "‼️Priority"
+        else:
+            return ""
+
 while True:
     show_main_menu()
     selection = input("\nAction: ").strip().upper()
@@ -80,10 +86,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking WHERE application_status != 'rejected' ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "N":
-                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details FROM application_tracking ORDER BY company ASC, date_applied ASC"
+                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking ORDER BY company ASC, date_applied ASC"
                 break
             elif selection == "X":
                 x_to_exit()
