@@ -83,7 +83,7 @@ def format_datetime(val):
         return val.strftime("%I:%M %p")
     return val
 
-########################
+########### BEGIN ##########
 
 while True:
     show_main_menu()
@@ -187,6 +187,7 @@ while True:
 #TODO: prompt completion of task for backlog (function)
 #TODO: show contact info details; message for if this is blank
 #TODO: when interview task is marked as completed, remind user to send thank you email
+#TODO: auto-status-map for removing tasks from backlog if manually updated
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         # begin backlog tasks
@@ -212,7 +213,7 @@ while True:
             print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
 
             while True:
-                selection = input("Would you like to see your backlog first? (Y/N/X): ").strip().upper()
+                selection = input("\nWould you like to see your backlog first? (Y/N/X): ").strip().upper()
                 if selection == "X":
                     x_to_exit()
                     break
