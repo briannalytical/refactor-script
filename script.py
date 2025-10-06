@@ -52,6 +52,19 @@ def deletion_cancelled():
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
+# automate application status updates
+AUTO_STATUS_MAP = {
+    'check_application_status': 'interviewing_first_scheduled',
+    'follow_up_with_contact': 'interviewing_first_scheduled',
+    'send_follow_up_email': 'interviewing_first_followed_up',
+    'prepare_for_interview': 'interviewing_first_completed',
+    'send_thank_you_email': 'interviewing_first_followed_up',
+    'prepare_for_second_interview': 'interviewing_second_completed',
+    'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
+    'prepare_for_final_interview': 'interviewing_final_completed',
+    'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
+}
+
 # formatting
 def format_status(status):
     status_map_formatting = {
@@ -182,7 +195,6 @@ while True:
                     number_selection_invalid()
 
 
-#TODO: display and order by priority then date applied
 #TODO: automation for follow-up post interview
 #TODO: prompt completion of task for backlog (function)
 #TODO: show contact info details; message for if this is blank
@@ -313,20 +325,9 @@ while True:
                             continue
 
                     if selection == "Y":
-                        auto_status_map = {
-                            'check_application_status': 'interviewing_first_scheduled',
-                            'follow_up_with_contact': 'interviewing_first_scheduled',
-                            'send_follow_up_email': 'interviewing_first_followed_up',
-                            'prepare_for_interview': 'interviewing_first_completed',
-                            'send_thank_you_email': 'interviewing_first_followed_up',
-                            'prepare_for_second_interview': 'interviewing_second_completed',
-                            'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
-                            'prepare_for_final_interview': 'interviewing_final_completed',
-                            'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
-                        }
 
-                        if next_action and next_action in auto_status_map:
-                            new_status = auto_status_map[next_action]
+                        if next_action and next_action in AUTO_STATUS_MAP:
+                            new_status = AUTO_STATUS_MAP[next_action]
                             cursor.execute("""
                                 UPDATE application_tracking
                                 SET application_status = %s
