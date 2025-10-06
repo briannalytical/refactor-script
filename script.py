@@ -15,6 +15,20 @@ cursor = conn.cursor()
 # fetch today's date
 today = date.today()
 
+# constants
+AUTO_STATUS_MAP = {
+    'check_application_status': 'interviewing_first_scheduled',
+    'follow_up_with_contact': 'interviewing_first_scheduled',
+    'send_follow_up_email': 'interviewing_first_followed_up',
+    'prepare_for_interview': 'interviewing_first_completed',
+    'send_thank_you_email': 'interviewing_first_followed_up',
+    'prepare_for_second_interview': 'interviewing_second_completed',
+    'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
+    'prepare_for_final_interview': 'interviewing_final_completed',
+    'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
+}
+
+
 # menu
 def show_intro():
     print("\n📋 Hello! Welcome to Refactor, your job application tracker! I hope you will find this tool useful! 🥰")
@@ -33,7 +47,7 @@ def show_main_menu():
     
 show_intro()
 
-# invalid entry handling
+# helpers for invalid selection handling
 def number_selection_invalid():
     print("\n😭 Invalid number selection. Please select from available options.")
 
@@ -52,20 +66,8 @@ def deletion_cancelled():
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
-# automate application status updates
-AUTO_STATUS_MAP = {
-    'check_application_status': 'interviewing_first_scheduled',
-    'follow_up_with_contact': 'interviewing_first_scheduled',
-    'send_follow_up_email': 'interviewing_first_followed_up',
-    'prepare_for_interview': 'interviewing_first_completed',
-    'send_thank_you_email': 'interviewing_first_followed_up',
-    'prepare_for_second_interview': 'interviewing_second_completed',
-    'send_thank_you_email_second_interview': 'interviewing_second_followed_up',
-    'prepare_for_final_interview': 'interviewing_final_completed',
-    'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
-}
 
-# formatting
+# helpers for formatting
 def format_status(status):
     status_map_formatting = {
         'applied': 'Applied',
@@ -95,6 +97,9 @@ def format_datetime(val):
     elif isinstance(val, datetime.time):
         return val.strftime("%I:%M %p")
     return val
+
+#TODO: rest of helper methods
+
 
 ########### BEGIN ##########
 
