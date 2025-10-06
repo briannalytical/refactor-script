@@ -186,6 +186,7 @@ while True:
 #TODO: automation for follow-up post interview
 #TODO: prompt completion of task for backlog (function)
 #TODO: show contact info details; message for if this is blank
+#TODO: when interview task is marked as completed, remind user to send thank you email
     #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         # begin backlog tasks
@@ -199,7 +200,7 @@ while True:
             OR (interview_date::DATE < %s AND interview_date IS NOT NULL)
             OR (second_interview_date::DATE < %s AND second_interview_date IS NOT NULL)
             OR (final_interview_date::DATE < %s AND final_interview_date IS NOT NULL)
-            ORDER BY next_follow_up_date ASC;
+            ORDER BY is_priority DESC, check_application_status ASC;
         """
         cursor.execute(backlog_query, (today, today, today, today, today))
         backlog_rows = cursor.fetchall()
@@ -229,7 +230,8 @@ while True:
                      check_date, current_status, follow_up_date, interview_date,
                      interview_time, second_interview_date, final_interview_date, is_priority) = row
 
-                    print(f"📌 {job_title} @ {company}")
+                    priority_indicator = " ‼️" if is_priority is True else ""
+                    print(f"📌 {job_title} @ {company} {priority_indicator}")
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
 
