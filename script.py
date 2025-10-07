@@ -47,6 +47,7 @@ def show_main_menu():
     
 show_intro()
 
+
 # helpers for invalid selection handling
 def number_selection_invalid():
     print("\n😭 Invalid number selection. Please select from available options.")
@@ -66,6 +67,7 @@ def deletion_cancelled():
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
+
 # helpers for business logic
 def update_application_status(cursor, conn, app_id, next_action):
     if next_action and next_action in AUTO_STATUS_MAP:
@@ -78,7 +80,6 @@ def update_application_status(cursor, conn, app_id, next_action):
         conn.commit()
         return new_status
     return None
-
 
 def prompt_manual_status_update(cursor, conn, app_id):
     """Prompt user to manually select and update status"""
@@ -104,10 +105,8 @@ def prompt_manual_status_update(cursor, conn, app_id):
 
     while True:
         selection = input("Enter the number (or X to exit): ").strip().upper()
-
         if selection == "X":
             return None
-
         if selection.isdigit():
             index = int(selection) - 1
             if 0 <= index < len(labels):
@@ -155,10 +154,9 @@ def format_datetime(val):
         return val.strftime("%I:%M %p")
     return val
 
-#TODO: rest of helper methods
-
 
 ########### BEGIN ##########
+
 
 while True:
     show_main_menu()
@@ -532,7 +530,9 @@ while True:
 
         print(f"\n{app_id}: {app[2]} - {app[1]}")
 
-#TODO: notes should append to existing notes instead of default replace
+        #TODO: notes should append to existing notes instead of default replace
+        #TODO: show selected application when menu option comes up.
+
         print("\nWhat do you want to update?")
         print("1. Application status")
         print("2. Update contact info")
@@ -545,30 +545,14 @@ while True:
             if selection == "X":
                 x_to_exit()
                 break
-            elif selection in ['1', '2', '3', '4', '5']:
-                break
-            else:
-                number_selection_invalid()
-                continue
+            if selection == "1":
+                new_status = prompt_manual_status_update(cursor, conn, app_id)
+                if new_status:
+                    print(f"\n✅ Status updated to: {format_status(new_status)}")
+                else:
+                    print("\n⏭️ Status update cancelled.")
 
-#TODO: show selected application when menu option comes up.
-        if selection == "1":
-            status_options = {
-                "Applied": "applied",
-                "First Interview Scheduled": "interviewing_first_scheduled",
-                "First Interview Completed": "interviewing_first_completed",
-                "Post First Interview Follow-Up Sent": "interviewing_first_followed_up",
-                "Second Interview Scheduled": "interviewing_second_scheduled",
-                "Second Interview Completed": "interviewing_second_completed",
-                "Post Second Interview Follow-Up Sent": "interviewing_second_followed_up",
-                "Final Interview Scheduled": "interviewing_final_scheduled",
-                "Final Interview Completed": "interviewing_final_completed",
-                "Post Final Interview Follow-Up Sent": "interviewing_final_followed_up",
-                "Offer Received": "offer_received",
-                "Rejected": "rejected"
-            }
-
-#TODO: prompt date and time entry for interviews
+        #TODO: prompt date and time entry for interviews
             print("\n📌 Select a new status:")
             labels = list(status_options.keys())
             
