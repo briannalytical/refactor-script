@@ -66,6 +66,63 @@ def deletion_cancelled():
 def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
+# helpers for business logic
+def update_application_status(cursor, conn, app_id, next_action):
+    if next_action and next_action in AUTO_STATUS_MAP:
+        new_status = AUTO_STATUS_MAP[next_action]
+        cursor.execute("""
+            UPDATE application_tracking
+            SET application_status = %s
+            WHERE id = %s;
+        """, (new_status, app_id))
+        conn.commit()
+        return new_status
+    return None
+
+
+def prompt_manual_status_update(cursor, conn, app_id):
+    """Prompt user to manually select and update status"""
+    status_options = {
+        "Applied": "applied",
+        "First Interview Scheduled": "interviewing_first_scheduled",
+        "First Interview Completed": "interviewing_first_completed",
+        "Post First Interview Follow-Up Sent": "interviewing_first_followed_up",
+        "Second Interview Scheduled": "interviewing_second_scheduled",
+        "Second Interview Completed": "interviewing_second_completed",
+        "Post Second Interview Follow-Up Sent": "interviewing_second_followed_up",
+        "Final Interview Scheduled": "interviewing_final_scheduled",
+        "Final Interview Completed": "interviewing_final_completed",
+        "Post Final Interview Follow-Up Sent": "interviewing_final_followed_up",
+        "Offer Received": "offer_received",
+        "Rejected": "rejected"
+    }
+
+    print("\n📌 Select new status:")
+    labels = list(status_options.keys())
+    for i, label in enumerate(labels, 1):
+        print(f"{i}. {label}")
+
+    while True:
+        selection = input("Enter the number (or X to exit): ").strip().upper()
+
+        if selection == "X":
+            return None
+
+        if selection.isdigit():
+            index = int(selection) - 1
+            if 0 <= index < len(labels):
+                new_status = status_options[labels[index]]
+                cursor.execute("""
+                    UPDATE application_tracking
+                    SET application_status = %s
+                    WHERE id = %s;
+                """, (new_status, app_id))
+                conn.commit()
+                return new_status
+            else:
+                number_selection_invalid()
+        else:
+            number_selection_invalid()
 
 # helpers for formatting
 def format_status(status):
@@ -361,20 +418,7 @@ while True:
                             continue
 
                     if selection == "Y":
-                        status_options = {
-                            "Applied": "applied",
-                            "First Interview Scheduled": "interviewing_first_scheduled",
-                            "First Interview Completed": "interviewing_first_completed",
-                            "Post First Interview Follow-Up Sent": "interviewing_first_followed_up",
-                            "Second Interview Scheduled": "interviewing_second_scheduled",
-                            "Second Interview Completed": "interviewing_second_completed",
-                            "Post Second Interview Follow-Up Sent": "interviewing_second_followed_up",
-                            "Final Interview Scheduled": "interviewing_final_scheduled",
-                            "Final Interview Completed": "interviewing_final_completed",
-                            "Post Final Interview Follow-Up Sent": "interviewing_final_followed_up",
-                            "Offer Received": "offer_received",
-                            "Rejected": "rejected"
-                        }
+
 
                         print("\n📌 Please select the number that corresponds with the status you'd like to update to:")
                         labels = list(status_options.keys())
