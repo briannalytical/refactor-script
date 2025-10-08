@@ -461,7 +461,8 @@ while True:
 #TODO: handle invalid selection
     # UPDATE: make updates to existing applications
     elif selection == "UPDATE":
-        cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY company;")
+        cursor.execute(
+            "SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY company;")
         apps = cursor.fetchall()
 
         if not apps:
@@ -474,33 +475,45 @@ while True:
 
         while True:
             try:
-                app_id = int(input("\nEnter the number of the application to update: "))
+                selection = input("\nEnter the number of the application to update (or X to exit): ").strip().upper()
                 if selection == "X":
                     x_to_exit()
                     break
+
+                app_id = int(selection)
                 # verify the id exists
-                elif any(app[0] == app_id for app in apps):
+                if any(app[0] == app_id for app in apps):
                     break
+                else:
+                    number_selection_invalid()
             except ValueError:
                 number_selection_invalid()
 
-        print(f"\n{app_id}: {app[2]} - {app[1]}")
+        if selection != "X":
+            # Find and display selected application
+            selected_app = next((app for app in apps if app[0] == app_id), None)
+            if selected_app:
+                print(f"\nSelected: {selected_app[0]}: {selected_app[2]} - {selected_app[1]}")
 
-        #TODO: notes should append to existing notes instead of default replace
-        #TODO: show selected application when menu option comes up.
+            print("\nWhat do you want to update?")
+            print("1. Application status")
+            print("2. Update contact info")
+            print("3. Schedule interview")
+            print("4. Notes")
+            print("5. Update priority")
+            print("6. Delete Entry")
 
-        print("\nWhat do you want to update?")
-        print("1. Application status")
-        print("2. Update contact info")
-        print("3. Schedule interview")
-        print("4. Notes")
-        print("5. Delete Entry")
-        
-        while True:
-            selection = input("\nField to update (1-5): ").strip()
-            if selection == "X":
-                x_to_exit()
-                break
+            while True:
+                selection = input("\nField to update (1-6, or X to exit): ").strip()
+                if selection == "X":
+                    x_to_exit()
+                    break
+                elif selection in ['1', '2', '3', '4', '5', '6']:
+                    break
+                else:
+                    number_selection_invalid()
+                    continue
+
             if selection == "1":
                 new_status = prompt_manual_status_update(cursor, conn, app_id)
                 if new_status:
@@ -508,143 +521,137 @@ while True:
                 else:
                     print("\n⏭️ Status update cancelled.")
 
-        #TODO: prompt date and time entry for interviews
-            print("\n📌 Select a new status:")
-            labels = list(status_options.keys())
-            
-            for i, label in enumerate(labels, 1):
-                print(f"{i}. {label}")
+            elif selection == "2":
+                contact_name = input("Contact name: ").strip()
+                contact_details = input("Contact email/phone/URL: ").strip()
+                cursor.execute("""
+                    UPDATE application_tracking
+                    SET follow_up_contact_name = %s,
+                        follow_up_contact_details = %s
+                    WHERE id = %s;
+                """, (contact_name, contact_details, app_id))
+                conn.commit()
+                print("\n✅ Follow-up contact updated.")
 
-            while True:
-                selection = input("Enter the number or status name: ").strip()
-                new_status = None
-                if selection == "X":
-                    x_to_exit()
-                    break
-                elif selection.isdigit():
-                    index = int(selection) - 1
-                    if 0 <= index < len(labels):
-                        new_status = status_options[labels[index]]
-                        break
-                    else:
-                        number_selection_invalid()
-                        continue
-                else:
-                    lower_map = {k.lower(): v for k, v in status_options.items()}
-                    if selection.lower() in lower_map:
-                        new_status = lower_map[selection.lower()]
-                        break
-                    else:
-                        number_selection_invalid()
-                        continue
+            elif selection == "3":
+                interview_date = input("Enter interview date (YYYY-MM-DD): ").strip()
+                interview_time = input("Enter interview time (HH:MM): ").strip()
+                interview_name = input("Interviewer name: ").strip()
+                prep_notes = input("Any prep notes? (optional): ").strip()
 
-            cursor.execute("""
-                UPDATE application_tracking
-                SET application_status = %s
-                WHERE id = %s;
-            """, (new_status, app_id))
-            conn.commit()
-            print("\n✅ Status updated.")
+                cursor.execute("""
+                    UPDATE application_tracking
+                    SET interview_date = %s,
+                        interview_time = %s,
+                        interviewer_name = %s,
+                        interview_prep_notes = %s
+                    WHERE id = %s;
+                """, (interview_date, interview_time or None, interview_name, prep_notes or None, app_id))
+                conn.commit()
+                print("\n✅ Interview details updated.")
 
-        elif selection == "2":
-            contact_name = input("Contact name: ").strip()
-            contact_details = input("Contact email/phone/URL: ").strip()
-            cursor.execute("""
-                UPDATE application_tracking
-                SET follow_up_contact_name = %s,
-                    follow_up_contact_details = %s
-                WHERE id = %s;
-            """, (contact_name, contact_details, app_id))
-            conn.commit()
-            print("\n✅ Follow-up contact updated.")
+            elif selection == "4":
+                new_notes = input("Enter your updated job notes: ").strip()
+                cursor.execute("""
+                    UPDATE application_tracking
+                    SET job_notes = %s
+                    WHERE id = %s;
+                """, (new_notes, app_id))
+                conn.commit()
+                print("\n✅ Notes updated.")
 
-        elif selection == "3":
-            interview_date = input("Enter interview date (YYYY-MM-DD): ").strip()
-            interview_time = input("Enter interview time (HH:MM): ").strip()
-            interview_name = input("Interviewer name: ").strip()
-            prep_notes = input("Any prep notes? (optional): ").strip()
-
-            cursor.execute("""
-                UPDATE application_tracking
-                SET interview_date = %s,
-                    interview_time = %s,
-                    interviewer_name = %s,
-                    interview_prep_notes = %s
-                WHERE id = %s;
-            """, (interview_date, interview_time or None, interview_name, prep_notes or None, app_id))
-            conn.commit()
-            print("\n✅ Interview details updated.")
-
-        elif selection == "4":
-            new_notes = input("Enter your updated job notes: ").strip()
-            cursor.execute("""
-                UPDATE application_tracking
-                SET job_notes = %s
-                WHERE id = %s;
-            """, (new_notes, app_id))
-            conn.commit()
-            print("\n✅ Notes updated.")
-        
-        elif selection == "5":
-            cursor.execute("""
-                SELECT job_title, company, application_status 
-                FROM application_tracking 
-                WHERE id = %s;
-            """, (app_id,))
-            app_details = cursor.fetchone()
-            
-            if app_details:
-                job_title, company, status = app_details
-                print(f"\n⚠️  You are about to delete:")
-                print(f"   Job: {job_title}")
-                print(f"   Company: {company}")
-                print(f"   Status: {status}")
-                
+            elif selection == "5":
                 while True:
-                    selection = input("\nAre you sure you want to delete this application? (Y/N): ").strip().upper()
-                    if selection == "X":
+                    priority_choice = input("Mark as priority? (Y/N/X): ").strip().upper()
+                    if priority_choice == "X":
                         x_to_exit()
                         break
-                    elif selection in ['Y', 'N']:
+                    elif priority_choice in ['Y', 'N']:
                         break
                     else:
                         yes_or_no_selection_invalid()
-        
-                if selection == "Y":
+
+                if priority_choice == "Y":
+                    cursor.execute("""
+                        UPDATE application_tracking
+                        SET is_priority = TRUE
+                        WHERE id = %s;
+                    """, (app_id,))
+                    conn.commit()
+                    print("\n✅ Application marked as priority.")
+                elif priority_choice == "N":
+                    cursor.execute("""
+                        UPDATE application_tracking
+                        SET is_priority = FALSE
+                        WHERE id = %s;
+                    """, (app_id,))
+                    conn.commit()
+                    print("\n✅ Priority removed from application.")
+
+            elif selection == "6":
+                cursor.execute("""
+                    SELECT job_title, company, application_status 
+                    FROM application_tracking 
+                    WHERE id = %s;
+                """, (app_id,))
+                app_details = cursor.fetchone()
+
+                if app_details:
+                    job_title, company, status = app_details
+                    print(f"\n⚠️  You are about to delete:")
+                    print(f"   Job: {job_title}")
+                    print(f"   Company: {company}")
+                    print(f"   Status: {status}")
+
                     while True:
-                        selection = input("This action cannot be undone. Type 'DELETE' to confirm: ").strip()
-                        if selection == "DELETE":
+                        selection = input(
+                            "\nAre you sure you want to delete this application? (Y/N/X): ").strip().upper()
+                        if selection == "X":
+                            x_to_exit()
                             break
-                        elif selection.upper() == "N" or selection.upper() == "NO":
-                            print("\n❌ Deletion cancelled.")
+                        elif selection in ['Y', 'N']:
                             break
                         else:
-                            print("\n❌ Please type 'DELETE' exactly to confirm, or 'N' to cancel")
-            
-                    if selection == "DELETE":
-                        cursor.execute("DELETE FROM application_tracking WHERE id = %s;", (app_id,))
-                        conn.commit()
-                        print(f"\n✅ Application for {job_title} @ {company} has been deleted.")
+                            yes_or_no_selection_invalid()
+
+                    if selection == "Y":
+                        while True:
+                            selection = input(
+                                "This action cannot be undone. Type 'DELETE' to confirm (or X to cancel): ").strip()
+                            if selection == "DELETE":
+                                break
+                            elif selection.upper() == "X" or selection.upper() == "N" or selection.upper() == "NO":
+                                print("\n❌ Deletion cancelled.")
+                                break
+                            else:
+                                print("\n❌ Please type 'DELETE' exactly to confirm, or 'X'/'N' to cancel")
+
+                        if selection == "DELETE":
+                            cursor.execute("DELETE FROM application_tracking WHERE id = %s;", (app_id,))
+                            conn.commit()
+                            print(f"\n✅ Application for {job_title} @ {company} has been deleted.")
+                        else:
+                            print("\n❌ Deletion cancelled.")
                     else:
-                        deletion_cancelled()
+                        print("\n❌ Deletion cancelled.")
                 else:
-                    deletion_cancelled()
-            else:
-                print("\n❌ Application not found.")
+                    print("\n❌ Application not found.")
 
 
     # TIPS: tips for job seekers
     elif selection == "TIPS":
         print("\n💡 Job Search Tips:")
-        print("📩 FOLLOW UP! You are 78% more likely to land an interview if you reach out to a recruiter or hiring manager after you apply.")
-        print("✏️ TAKE NOTES! You should already know why you want to work for the company and about their mission BEFORE speaking with someone from the company.")
+        print(
+            "📩 FOLLOW UP! You are 78% more likely to land an interview if you reach out to a recruiter or hiring manager after you apply.")
+        print(
+            "✏️ TAKE NOTES! You should already know why you want to work for the company and about their mission BEFORE speaking with someone from the company.")
         print("🔑 Confidence is Key! You know you deserve this job and focus on YOU, not anyone else!")
         print("💻 Keep applying, keep trying. It will not be this way forever.")
 
     elif selection == "BYE":
         print("\n👋 Goodbye! Check back again soon!")
         break
-    
+
     else:
         print("\n❌ Invalid selection. 🥲 Please try again from the main menu.")
 
