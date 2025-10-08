@@ -68,7 +68,7 @@ def x_to_exit():
     print("\n🔙 Returning to main menu.")
 
 
-# helpers for business logic
+# business logic
 def update_application_status(cursor, conn, app_id, next_action):
     if next_action and next_action in AUTO_STATUS_MAP:
         new_status = AUTO_STATUS_MAP[next_action]
@@ -82,7 +82,6 @@ def update_application_status(cursor, conn, app_id, next_action):
     return None
 
 def prompt_manual_status_update(cursor, conn, app_id):
-    """Prompt user to manually select and update status"""
     status_options = {
         "Applied": "applied",
         "First Interview Scheduled": "interviewing_first_scheduled",
@@ -167,10 +166,10 @@ while True:
             selection = input("\nDo you want to see only active applications? (Y/N) Press X to exit: ").strip().upper()
 
             if selection == "Y":
-                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking WHERE application_status != 'rejected' ORDER BY is_priority DESC, company ASC, date_applied ASC"
+                daily_query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking WHERE application_status != 'rejected' ORDER BY is_priority DESC, company ASC, date_applied ASC"
                 break
             elif selection == "N":
-                query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking ORDER BY is_priority DESC, company ASC, date_applied ASC"
+                daily_query = "SELECT company, job_title, id, application_status, date_applied, follow_up_contact_name, follow_up_contact_details, is_priority FROM application_tracking ORDER BY is_priority DESC, company ASC, date_applied ASC"
                 break
             elif selection == "X":
                 x_to_exit()
@@ -180,7 +179,7 @@ while True:
                 continue
 
         if selection != "X":
-            cursor.execute(query)
+            cursor.execute(daily_query)
             rows = cursor.fetchall()
             column_names = [desc[0] for desc in cursor.description]
 
@@ -260,7 +259,6 @@ while True:
 #TODO: show contact info details; message for if this is blank
 #TODO: when interview task is marked as completed, remind user to send thank you email
 #TODO: auto-status-map for removing tasks from backlog if manually updated
-    #TASKS: check follow-up tasks information
     elif selection == "TASKS":
         # begin backlog tasks
         backlog_query = """
@@ -327,19 +325,19 @@ while True:
 
         # begin daily task board
         if selection == "N":
-            query = """
+            daily_query = """
                 SELECT id, job_title, company, next_action,
                    check_application_status, application_status, next_follow_up_date,
-                   interview_date, interview_time, second_interview_date, final_interview_date
+                   interview_date, interview_time, second_interview_date, final_interview_date, is_priority
                 FROM application_tracking
                 WHERE check_application_status::DATE = %s
                 OR next_follow_up_date::DATE = %s
                 OR interview_date::DATE = %s
                 OR second_interview_date::DATE = %s
                 OR final_interview_date::DATE = %s
-                ORDER BY job_title;
+                ORDER BY is_priority DESC, job_title;
             """
-            cursor.execute(query, (today, today, today, today, today))
+            cursor.execute(daily_query, (today, today, today, today, today))
             rows = cursor.fetchall()
 
             if not rows:
@@ -348,12 +346,12 @@ while True:
                 print(f"\n🗓️ Tasks for {today.strftime('%A, %B %d, %Y')}")
                 print("-" * 60)
 
-                backlog_tasks = []  # store any incomplete tasks
+                backlog_tasks = []
 
                 for row in rows:
                     (app_id, job_title, company, next_action,
                      check_date, current_status, follow_up_date, interview_date,
-                     interview_time, second_interview_date, final_interview_date) = row
+                     interview_time, second_interview_date, final_interview_date, is_priority) = row
 
                     # determine task type
                     if (interview_date == today or
@@ -364,7 +362,8 @@ while True:
                         due_type = "Follow Up"
 
                     # print tasks
-                    print(f"📌 {job_title} @ {company}")
+                    priority_indicator = " ‼️" if is_priority is True else ""
+                    print(f"📌 {job_title} @ {company}{priority_indicator}")
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
                     print(f"   → Type: {due_type}")
@@ -374,7 +373,7 @@ while True:
 
                     # task completion
                     while True:
-                        selection = input("\n✅ Mark this task as completed? (Y/N): ").strip().upper()
+                        selection = input("✅ Mark this task as completed? (Y/N/X): ").strip().upper()
                         if selection == "X":
                             x_to_exit()
                             break
@@ -385,27 +384,19 @@ while True:
                             continue
 
                     if selection == "Y":
-
-                        if next_action and next_action in AUTO_STATUS_MAP:
-                            new_status = AUTO_STATUS_MAP[next_action]
-                            cursor.execute("""
-                                UPDATE application_tracking
-                                SET application_status = %s
-                                WHERE id = %s;
-                            """, (new_status, app_id))
-                            conn.commit()
-                            print(f"\n✅ Status auto-updated to: {new_status}\n")
+                        # Auto-update status based on next_action
+                        new_status = update_application_status(cursor, conn, app_id, next_action)
+                        if new_status:
+                            print(f"\n✅ Status auto-updated to: {format_status(new_status)}\n")
                         else:
-                            print("\n✅ Task marked as completed")
-
+                            print("\n✅ Task marked as completed\n")
                     else:
                         backlog_tasks.append((job_title, company, next_action or "Follow up"))
 
-#TODO: implement status method
                     # manual status update option
                     while True:
                         selection = input(
-                            "\n✏️ Would you like to manually update the application status? This is for if you have jumped forward in the interview pipeline. (Y/N): ").strip().upper()
+                            "\n✏️ Would you like to manually update the application status? (Y/N/X): ").strip().upper()
                         if selection == "X":
                             x_to_exit()
                             break
@@ -416,45 +407,11 @@ while True:
                             continue
 
                     if selection == "Y":
-
-
-                        print("\n📌 Please select the number that corresponds with the status you'd like to update to:")
-                        labels = list(status_options.keys())
-
-                        for i, label in enumerate(labels, 1):
-                            print(f"{i}. {label}")
-
-                        while True:
-                            selection = input("Enter the number: ").strip()
-                            new_status = None
-
-                            if selection == "X":
-                                x_to_exit()
-                                break
-                            elif selection.isdigit():
-                                index = int(selection) - 1
-                                if 0 <= index < len(labels):
-                                    new_status = status_options[labels[index]]
-                                    break
-                                else:
-                                    number_selection_invalid()
-                                    continue
-                            else:
-                                lower_map = {k.lower(): v for k, v in status_options.items()}
-                                if selection.lower() in lower_map:
-                                    new_status = lower_map[selection.lower()]
-                                    break
-                                else:
-                                    number_selection_invalid()
-                                    continue
-
-                        cursor.execute("""
-                            UPDATE application_tracking
-                            SET application_status = %s
-                            WHERE id = %s;
-                        """, (new_status, app_id))
-                        conn.commit()
-                        print(f"\n✅ Status manually updated to: {new_status}\n")
+                        new_status = prompt_manual_status_update(cursor, conn, app_id)
+                        if new_status:
+                            print(f"\n✅ Status manually updated to: {format_status(new_status)}\n")
+                        else:
+                            print("\n⏭️ Skipped status update.\n")
                     else:
                         print("\n⏭️ Skipped status update.\n")
 
@@ -465,7 +422,6 @@ while True:
                     for job_title, company, task in backlog_tasks:
                         print(f"📌 {job_title} @ {company} - {task}")
                     print("-" * 60)
-
 
     # ENTER: individual application entry
     elif selection == "ENTER":
@@ -501,9 +457,9 @@ while True:
         print("\n✅ Application added! I'll remind you when you have tasks related to this job. 😊")
 
 
-    # UPDATE: make updates to existing applications
 #TODO: make update for priority
 #TODO: handle invalid selection
+    # UPDATE: make updates to existing applications
     elif selection == "UPDATE":
         cursor.execute("SELECT id, job_title, company FROM application_tracking WHERE application_status != 'rejected' ORDER BY company;")
         apps = cursor.fetchall()
