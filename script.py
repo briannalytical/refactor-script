@@ -551,14 +551,39 @@ while True:
                 print("\n✅ Interview details updated.")
 
             elif selection == "4":
-                new_notes = input("Enter your updated job notes: ").strip()
+                # fetch current notes
                 cursor.execute("""
-                    UPDATE application_tracking
-                    SET job_notes = %s
+                    SELECT job_notes
+                    FROM application_tracking
                     WHERE id = %s;
-                """, (new_notes, app_id))
-                conn.commit()
-                print("\n✅ Notes updated.")
+                """, (app_id,))
+                result = cursor.fetchone()
+                current_notes = result[0] if result and result[0] else ""
+
+                # display current notes
+                if current_notes:
+                    print(f"\nCurrent notes: {current_notes}")
+                else:
+                    print("\nNo existing notes for this application.")
+
+                new_notes = input("\nEnter additional notes (or X to cancel): ").strip()
+
+                if new_notes.upper() == "X":
+                    x_to_exit()
+                else:
+                    # append new notes to existing ones
+                    if current_notes:
+                        updated_notes = f"{current_notes}; {new_notes}"
+                    else:
+                        updated_notes = new_notes
+
+                    cursor.execute("""
+                        UPDATE application_tracking
+                        SET job_notes = %s
+                        WHERE id = %s;
+                    """, (updated_notes, app_id))
+                    conn.commit()
+                    print("\n✅ Notes updated.")
 
             elif selection == "5":
                 while True:
