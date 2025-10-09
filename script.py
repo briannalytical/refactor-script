@@ -255,7 +255,6 @@ while True:
 
 
 #TODO: automation for follow-up post interview
-#TODO: prompt completion of task for backlog (function)
 #TODO: show contact info details; message for if this is blank
 #TODO: when interview task is marked as completed, remind user to send thank you email
 #TODO: auto-status-map for removing tasks from backlog if manually updated
@@ -457,8 +456,9 @@ while True:
         print("\n✅ Application added! I'll remind you when you have tasks related to this job. 😊")
 
 
-#TODO: make update for priority
-#TODO: handle invalid selection
+    #TODO: view details printing twice
+    #TODO: handle invalid selection
+
     # UPDATE: make updates to existing applications
     elif selection == "UPDATE":
         cursor.execute(
