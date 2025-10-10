@@ -356,6 +356,7 @@ while True:
                                 print("\n⚠️  No contact information found for this application.")
                                 print(
                                     "💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
+                                print("You will need this information to complete the task.")
 
                                 while True:
                                     add_contact = input(
