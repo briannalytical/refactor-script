@@ -254,15 +254,17 @@ while True:
                     number_selection_invalid()
 
 
-#TODO: automation for follow-up post interview
-#TODO: show contact info details; message for if this is blank
-#TODO: when interview task is marked as completed, remind user to send thank you email
-#TODO: auto-status-map for removing tasks from backlog if manually updated
+    #TODO: automation for follow-up post interview
+    #TODO: show contact info details; message for if this is blank
+    #TODO: when interview task is marked as completed, remind user to send thank you email
+    #TODO: auto-status-map for removing tasks from backlog if manually updated
+    #TODO: view details printing twice
+
     elif selection == "TASKS":
         # begin backlog tasks
         backlog_query = """
             SELECT id, job_title, company, next_action,
-               check_application_status, application_status, next_follow_up_date,
+               check_application_status, follow_up_contact_name, follow_up_contact_info, application_status, next_follow_up_date,
                interview_date, interview_time, second_interview_date, final_interview_date, is_priority
             FROM application_tracking
             WHERE (check_application_status::DATE < %s AND check_application_status IS NOT NULL)
@@ -282,7 +284,7 @@ while True:
             print(f"\n📋 You have {len(backlog_rows)} overdue task(s) in your backlog!")
 
             while True:
-                selection = input("\nWould you like to see your backlog first? (Y/N/X): ").strip().upper()
+                selection = input("\nWould you like to view your backlog first? (Y/N/X): ").strip().upper()
                 if selection == "X":
                     x_to_exit()
                     break
@@ -301,7 +303,7 @@ while True:
                      interview_time, second_interview_date, final_interview_date, is_priority) = row
 
                     priority_indicator = " ‼️" if is_priority is True else ""
-                    print(f"📌 {job_title} @ {company} {priority_indicator}")
+                    print(f"📌 {job_title} @ {company} ({app_id}) {priority_indicator}")
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
 
@@ -320,7 +322,109 @@ while True:
                     if overdue_dates:
                         print(f"   → Overdue: {', '.join(overdue_dates)}")
                     print()
-                print("-" * 60)
+                print("=" * 60)
+
+                while True:
+                    selection = input(
+                        "\nEnter the ID of the task you would like to complete (or X to exit): ").strip().upper()
+
+                    if selection == "X":
+                        x_to_exit()
+                        break
+
+                    try:
+                        selected_id = int(selection)
+                        # Find the selected task in backlog_rows
+                        selected_task = None
+                        for row in backlog_rows:
+                            if row[0] == selected_id:  # row[0] is the app_id
+                                selected_task = row
+                                break
+
+                        if selected_task:
+                            # Unpack the selected task (14 columns)
+                            (app_id, job_title, company, next_action,
+                             check_date, contact_name, contact_info, current_status, follow_up_date,
+                             interview_date, interview_time, second_interview_date, final_interview_date,
+                             is_priority) = selected_task
+
+                            # Display the task details
+                            priority_indicator = " ‼️" if is_priority is True else ""
+                            print(f"\n📌 Selected: {job_title} @ {company}{priority_indicator}")
+                            print(f"   → Current Status: {format_status(current_status)}")
+                            if next_action:
+                                print(f"   → Task: {next_action.replace('_', ' ').title()}")
+                            if contact_name:
+                                print(f"   → Contact: {contact_name}")
+                            if contact_info:
+                                print(f"   → Contact Info: {contact_info}")
+
+                            # Show overdue dates
+                            overdue_dates = []
+                            if check_date and check_date.date() < today:
+                                overdue_dates.append(f"Check status: {check_date.strftime('%B %d, %Y')}")
+                            if follow_up_date and follow_up_date.date() < today:
+                                overdue_dates.append(f"Follow up: {follow_up_date.strftime('%B %d, %Y')}")
+                            if interview_date and interview_date.date() < today:
+                                overdue_dates.append(f"Interview: {interview_date.strftime('%B %d, %Y')}")
+                            if second_interview_date and second_interview_date.date() < today:
+                                overdue_dates.append(f"2nd Interview: {second_interview_date.strftime('%B %d, %Y')}")
+                            if final_interview_date and final_interview_date.date() < today:
+                                overdue_dates.append(f"Final Interview: {final_interview_date.strftime('%B %d, %Y')}")
+
+                            if overdue_dates:
+                                print(f"   → Overdue: {', '.join(overdue_dates)}")
+                            print()
+
+                            # Task completion
+                            while True:
+                                selection = input("✅ Mark this task as completed? (Y/N/X): ").strip().upper()
+                                if selection == "X":
+                                    x_to_exit()
+                                    break
+                                elif selection in ['Y', 'N']:
+                                    break
+                                else:
+                                    yes_or_no_selection_invalid()
+                                    continue
+
+                            if selection == "Y":
+                                # Auto-update status based on next_action
+                                new_status = update_application_status(cursor, conn, app_id, next_action)
+                                if new_status:
+                                    print(f"\n✅ Status auto-updated to: {format_status(new_status)}\n")
+                                else:
+                                    print("\n✅ Task marked as completed\n")
+
+                            # Manual status update option
+                            while True:
+                                selection = input(
+                                    "\n✏️ Would you like to manually update the application status? (Y/N/X): ").strip().upper()
+                                if selection == "X":
+                                    x_to_exit()
+                                    break
+                                elif selection in ['Y', 'N']:
+                                    break
+                                else:
+                                    letter_selection_invalid()
+                                    continue
+
+                            if selection == "Y":
+                                new_status = prompt_manual_status_update(cursor, conn, app_id)
+                                if new_status:
+                                    print(f"\n✅ Status manually updated to: {format_status(new_status)}\n")
+                                else:
+                                    print("\n⏭️ Skipped status update.\n")
+                            else:
+                                print("\n⏭️ Skipped status update.\n")
+
+                            break  # Exit the selection loop after processing
+                        else:
+                            number_selection_invalid()
+
+                    except ValueError:
+                        number_selection_invalid()
+
 
         # begin daily task board
         if selection == "N":
@@ -456,9 +560,6 @@ while True:
         print("\n✅ Application added! I'll remind you when you have tasks related to this job. 😊")
 
 
-    #TODO: view details printing twice
-    #TODO: handle invalid selection
-
     # UPDATE: make updates to existing applications
     elif selection == "UPDATE":
         cursor.execute(
@@ -490,7 +591,7 @@ while True:
                 number_selection_invalid()
 
         if selection != "X":
-            # Find and display selected application
+            # find and display selected application
             selected_app = next((app for app in apps if app[0] == app_id), None)
             if selected_app:
                 print(f"\nSelected: {selected_app[0]}: {selected_app[2]} - {selected_app[1]}")
@@ -672,6 +773,7 @@ while True:
             "✏️ TAKE NOTES! You should already know why you want to work for the company and about their mission BEFORE speaking with someone from the company.")
         print("🔑 Confidence is Key! You know you deserve this job and focus on YOU, not anyone else!")
         print("💻 Keep applying, keep trying. It will not be this way forever.")
+
 
     elif selection == "BYE":
         print("\n👋 Goodbye! Check back again soon!")
