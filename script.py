@@ -264,7 +264,7 @@ while True:
         # begin backlog tasks
         backlog_query = """
             SELECT id, job_title, company, next_action,
-               check_application_status, follow_up_contact_name, follow_up_contact_info, application_status, next_follow_up_date,
+               check_application_status, follow_up_contact_name, follow_up_contact_details, application_status, next_follow_up_date,
                interview_date, interview_time, second_interview_date, final_interview_date, is_priority
             FROM application_tracking
             WHERE (check_application_status::DATE < %s AND check_application_status IS NOT NULL)
