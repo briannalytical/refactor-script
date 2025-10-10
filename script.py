@@ -28,7 +28,6 @@ AUTO_STATUS_MAP = {
     'send_thank_you_email_final_interview': 'interviewing_final_followed_up'
 }
 
-
 # menu
 def show_intro():
     print("\n📋 Hello! Welcome to Refactor, your job application tracker! I hope you will find this tool useful! 🥰")
@@ -145,6 +144,41 @@ def format_priority(is_priority):
         return "‼️ Priority"
     else:
         return ""
+
+def format_contact_info(cursor, conn, app_id, contact_name, contact_details):
+    if not contact_name and not contact_details:
+        print("\n⚠️  No contact information found for this application.")
+        print("💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
+        print("  You will need this information to complete the task.")
+
+        while True:
+            add_contact = input("\nWould you like to add contact information now? (Y/N/X): ").strip().upper()
+            if add_contact == "X":
+                return False  # Return False to indicate user wants to exit
+            elif add_contact in ['Y', 'N']:
+                break
+            else:
+                yes_or_no_selection_invalid()
+
+        if add_contact == "Y":
+            contact_name = input("Contact name: ").strip()
+            contact_details = input("Contact email/phone/LinkedIn URL: ").strip()
+
+            cursor.execute("""
+                UPDATE application_tracking
+                SET follow_up_contact_name = %s,
+                    follow_up_contact_details = %s
+                WHERE id = %s;
+            """, (contact_name or None, contact_details or None, app_id))
+            conn.commit()
+            print("\n✅ Contact information added!")
+    else:
+        # display existing contact info
+        if contact_name:
+            print(f"   → Contact: {contact_name}")
+        if contact_details:
+            print(f"   → Contact Info: {contact_details}")
+    return True
 
 def format_datetime(val):
     if isinstance(val, datetime.date):
@@ -352,12 +386,10 @@ while True:
                             if next_action:
                                 print(f"   → Task: {next_action.replace('_', ' ').title()}")
 
-                            # check if contact info is missing
-                            if not contact_name and not contact_details:
-                                print("\n⚠️  No contact information found for this application.")
-                                print(
-                                    "💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
-                                print("  You will need this information to complete the task.")
+                                # check if contact info is missing
+                                should_continue = format_contact_info(cursor, conn, app_id, contact_name, contact_details)
+                                if not should_continue:
+                                    break
 
                                 while True:
                                     add_contact = input(
@@ -508,45 +540,10 @@ while True:
                         print(f"   → Interview Time: {interview_time.strftime('%I:%M %p')}")
 
                     # check for missing contact info and prompt user
-                    if not contact_name and not contact_details:
-                        print("\n⚠️  No contact information found for this application.")
-                        print(
-                            "💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
-                        print("You will need this information to complete this task.")
-
-                        while True:
-                            add_contact = input(
-                                "\nWould you like to add contact information now? (Y/N/X): ").strip().upper()
-                            if add_contact == "X":
-                                should_exit = True
-                                break
-                            elif add_contact in ['Y', 'N']:
-                                break
-                            else:
-                                yes_or_no_selection_invalid()
-
-                        if should_exit:
-                            break
-
-                        if add_contact == "Y":
-                            contact_name = input("Contact name: ").strip()
-                            contact_details = input("Contact email/phone/LinkedIn URL: ").strip()
-
-                            cursor.execute("""
-                                UPDATE application_tracking
-                                SET follow_up_contact_name = %s,
-                                    follow_up_contact_details = %s
-                                WHERE id = %s;
-                            """, (contact_name or None, contact_details or None, app_id))
-                            conn.commit()
-                            print("\n✅ Contact information added!")
-                    else:
-                        if contact_name:
-                            print(f"   → Contact: {contact_name}")
-                        if contact_details:
-                            print(f"   → Contact Info: {contact_details}")
-
-                    print()
+                    should_continue = format_contact_info(cursor, conn, app_id, contact_name, contact_details)
+                    if not should_continue:
+                        should_exit = True
+                        break
 
                     # task completion
                     while True:
