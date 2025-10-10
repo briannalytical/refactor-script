@@ -298,9 +298,8 @@ while True:
                 print(f"\n📋 Backlog - Overdue Tasks")
                 print("-" * 60)
                 for row in backlog_rows:
-                    (app_id, job_title, company, next_action,
-                     check_date, current_status, follow_up_date, interview_date,
-                     interview_time, second_interview_date, final_interview_date, is_priority) = row
+                    (app_id, job_title, company, next_action, check_date, contact_name, contact_details, current_status,
+                    follow_up_date, interview_date, interview_time, second_interview_date, final_interview_date, is_priority) = row
 
                     priority_indicator = " ‼️" if is_priority is True else ""
                     print(f"📌 {job_title} @ {company} ({app_id}) {priority_indicator}")
@@ -343,10 +342,8 @@ while True:
 
                         if selected_task:
                             # Unpack the selected task (14 columns)
-                            (app_id, job_title, company, next_action,
-                             check_date, contact_name, contact_info, current_status, follow_up_date,
-                             interview_date, interview_time, second_interview_date, final_interview_date,
-                             is_priority) = selected_task
+                            (app_id, job_title, company, next_action, check_date, contact_name, contact_details, current_status,
+                             follow_up_date, interview_date, interview_time, second_interview_date, final_interview_date, is_priority) = selected_task
 
                             # Display the task details
                             priority_indicator = " ‼️" if is_priority is True else ""
@@ -356,8 +353,8 @@ while True:
                                 print(f"   → Task: {next_action.replace('_', ' ').title()}")
                             if contact_name:
                                 print(f"   → Contact: {contact_name}")
-                            if contact_info:
-                                print(f"   → Contact Info: {contact_info}")
+                            if contact_details:
+                                print(f"   → Contact Info: {contact_details}")
 
                             # Show overdue dates
                             overdue_dates = []
