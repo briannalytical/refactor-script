@@ -257,8 +257,6 @@ while True:
     #TODO: automation for follow-up post interview
     #TODO: when interview task is marked as completed, remind user to send thank you email
     #TODO: auto-status-map for removing tasks from backlog if manually updated
-    #TODO: view details printing twice
-
     elif selection == "TASKS":
         # begin backlog tasks
         backlog_query = """
@@ -298,7 +296,8 @@ while True:
                 print("-" * 60)
                 for row in backlog_rows:
                     (app_id, job_title, company, next_action, check_date, contact_name, contact_details, current_status,
-                    follow_up_date, interview_date, interview_time, second_interview_date, final_interview_date, is_priority) = row
+                     follow_up_date, interview_date, interview_time, second_interview_date, final_interview_date,
+                     is_priority) = row
 
                     priority_indicator = " ‼️" if is_priority is True else ""
                     print(f"📌 {job_title} @ {company} ({app_id}) {priority_indicator}")
@@ -341,8 +340,10 @@ while True:
 
                         if selected_task:
                             # Unpack the selected task (14 columns)
-                            (app_id, job_title, company, next_action, check_date, contact_name, contact_details, current_status,
-                             follow_up_date, interview_date, interview_time, second_interview_date, final_interview_date, is_priority) = selected_task
+                            (app_id, job_title, company, next_action, check_date, contact_name, contact_details,
+                             current_status,
+                             follow_up_date, interview_date, interview_time, second_interview_date,
+                             final_interview_date, is_priority) = selected_task
 
                             # display the task details
                             priority_indicator = " ‼️" if is_priority is True else ""
@@ -356,7 +357,7 @@ while True:
                                 print("\n⚠️  No contact information found for this application.")
                                 print(
                                     "💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
-                                print("You will need this information to complete the task.")
+                                print("  You will need this information to complete the task.")
 
                                 while True:
                                     add_contact = input(
@@ -453,12 +454,12 @@ while True:
                     except ValueError:
                         number_selection_invalid()
 
-
-        # begin daily task board
+        # begin daily task board - THIS SHOULD BE AT THE SAME LEVEL AS "if backlog_rows:"
         if selection == "N":
             daily_query = """
                 SELECT id, job_title, company, next_action,
-                   check_application_status, application_status, next_follow_up_date,
+                   check_application_status, follow_up_contact_name, follow_up_contact_details, 
+                   application_status, next_follow_up_date,
                    interview_date, interview_time, second_interview_date, final_interview_date, is_priority
                 FROM application_tracking
                 WHERE check_application_status::DATE = %s
@@ -478,11 +479,15 @@ while True:
                 print("-" * 60)
 
                 backlog_tasks = []
+                should_exit = False
 
                 for row in rows:
+                    if should_exit:
+                        break
+
                     (app_id, job_title, company, next_action,
-                     check_date, current_status, follow_up_date, interview_date,
-                     interview_time, second_interview_date, final_interview_date, is_priority) = row
+                     check_date, contact_name, contact_details, current_status, follow_up_date,
+                     interview_date, interview_time, second_interview_date, final_interview_date, is_priority) = row
 
                     # determine task type
                     if (interview_date == today or
@@ -495,24 +500,68 @@ while True:
                     # print tasks
                     priority_indicator = " ‼️" if is_priority is True else ""
                     print(f"📌 {job_title} @ {company}{priority_indicator}")
+                    print(f"   → Current Status: {format_status(current_status)}")
                     if next_action:
                         print(f"   → Task: {next_action.replace('_', ' ').title()}")
                     print(f"   → Type: {due_type}")
                     if interview_time:
                         print(f"   → Interview Time: {interview_time.strftime('%I:%M %p')}")
+
+                    # check for missing contact info and prompt user
+                    if not contact_name and not contact_details:
+                        print("\n⚠️  No contact information found for this application.")
+                        print(
+                            "💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
+                        print("You will need this information to complete this task.")
+
+                        while True:
+                            add_contact = input(
+                                "\nWould you like to add contact information now? (Y/N/X): ").strip().upper()
+                            if add_contact == "X":
+                                should_exit = True
+                                break
+                            elif add_contact in ['Y', 'N']:
+                                break
+                            else:
+                                yes_or_no_selection_invalid()
+
+                        if should_exit:
+                            break
+
+                        if add_contact == "Y":
+                            contact_name = input("Contact name: ").strip()
+                            contact_details = input("Contact email/phone/LinkedIn URL: ").strip()
+
+                            cursor.execute("""
+                                UPDATE application_tracking
+                                SET follow_up_contact_name = %s,
+                                    follow_up_contact_details = %s
+                                WHERE id = %s;
+                            """, (contact_name or None, contact_details or None, app_id))
+                            conn.commit()
+                            print("\n✅ Contact information added!")
+                    else:
+                        if contact_name:
+                            print(f"   → Contact: {contact_name}")
+                        if contact_details:
+                            print(f"   → Contact Info: {contact_details}")
+
                     print()
 
                     # task completion
                     while True:
                         selection = input("✅ Mark this task as completed? (Y/N/X): ").strip().upper()
                         if selection == "X":
-                            x_to_exit()
+                            should_exit = True
                             break
                         elif selection in ['Y', 'N']:
                             break
                         else:
                             yes_or_no_selection_invalid()
                             continue
+
+                    if should_exit:
+                        break
 
                     if selection == "Y":
                         # Auto-update status based on next_action
@@ -529,13 +578,16 @@ while True:
                         selection = input(
                             "\n✏️ Would you like to manually update the application status? (Y/N/X): ").strip().upper()
                         if selection == "X":
-                            x_to_exit()
+                            should_exit = True
                             break
                         elif selection in ['Y', 'N']:
                             break
                         else:
                             letter_selection_invalid()
                             continue
+
+                    if should_exit:
+                        break
 
                     if selection == "Y":
                         new_status = prompt_manual_status_update(cursor, conn, app_id)
@@ -546,8 +598,8 @@ while True:
                     else:
                         print("\n⏭️ Skipped status update.\n")
 
-                # show today's incomplete tasks
-                if backlog_tasks:
+                # show today's incomplete tasks (only if not exiting)
+                if backlog_tasks and not should_exit:
                     print("\n📋 Today's Incomplete Tasks:")
                     print("-" * 60)
                     for job_title, company, task in backlog_tasks:
