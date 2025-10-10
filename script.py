@@ -255,7 +255,6 @@ while True:
 
 
     #TODO: automation for follow-up post interview
-    #TODO: show contact info details; message for if this is blank
     #TODO: when interview task is marked as completed, remind user to send thank you email
     #TODO: auto-status-map for removing tasks from backlog if manually updated
     #TODO: view details printing twice
@@ -333,10 +332,10 @@ while True:
 
                     try:
                         selected_id = int(selection)
-                        # Find the selected task in backlog_rows
+                        # find selected task based on app id
                         selected_task = None
                         for row in backlog_rows:
-                            if row[0] == selected_id:  # row[0] is the app_id
+                            if row[0] == selected_id:
                                 selected_task = row
                                 break
 
@@ -345,16 +344,47 @@ while True:
                             (app_id, job_title, company, next_action, check_date, contact_name, contact_details, current_status,
                              follow_up_date, interview_date, interview_time, second_interview_date, final_interview_date, is_priority) = selected_task
 
-                            # Display the task details
+                            # display the task details
                             priority_indicator = " ‼️" if is_priority is True else ""
                             print(f"\n📌 Selected: {job_title} @ {company}{priority_indicator}")
                             print(f"   → Current Status: {format_status(current_status)}")
                             if next_action:
                                 print(f"   → Task: {next_action.replace('_', ' ').title()}")
-                            if contact_name:
-                                print(f"   → Contact: {contact_name}")
-                            if contact_details:
-                                print(f"   → Contact Info: {contact_details}")
+
+                            # check if contact info is missing
+                            if not contact_name and not contact_details:
+                                print("\n⚠️  No contact information found for this application.")
+                                print(
+                                    "💡 Tip: Finding a recruiter or hiring manager increases your chances of getting an interview!")
+
+                                while True:
+                                    add_contact = input(
+                                        "\nWould you like to add contact information now? (Y/N/X): ").strip().upper()
+                                    if add_contact == "X":
+                                        x_to_exit()
+                                        break
+                                    elif add_contact in ['Y', 'N']:
+                                        break
+                                    else:
+                                        yes_or_no_selection_invalid()
+
+                                if add_contact == "Y":
+                                    contact_name = input("Contact name: ").strip()
+                                    contact_details = input("Contact email/phone/LinkedIn URL: ").strip()
+
+                                    cursor.execute("""
+                                        UPDATE application_tracking
+                                        SET follow_up_contact_name = %s,
+                                            follow_up_contact_details = %s
+                                        WHERE id = %s;
+                                    """, (contact_name or None, contact_details or None, app_id))
+                                    conn.commit()
+                                    print("\n✅ Contact information added!")
+                            else:
+                                if contact_name:
+                                    print(f"   → Contact: {contact_name}")
+                                if contact_details:
+                                    print(f"   → Contact Info: {contact_details}")
 
                             # Show overdue dates
                             overdue_dates = []
